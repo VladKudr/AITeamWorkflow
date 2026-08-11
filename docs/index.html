@@ -1,0 +1,1289 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Playbook · Spec-Driven разработка с ИИ · OpenSpec</title>
+<style>
+  :root{
+    --ink:#1c1f26; --ink-soft:#4b5563; --ink-mute:#8a919e;
+    --bg:#f7f6f3; --panel:#ffffff; --line:#e5e2db;
+    --accent:#0f4c5c; --accent-soft:#e3eef1;
+    --pm:#b45309;  --pm-bg:#fdf3e3;
+    --sa:#1d4ed8;  --sa-bg:#e8eefc;
+    --dev:#047857; --dev-bg:#e3f4ee;
+    --qa:#7c3aed;  --qa-bg:#f0e9fd;
+    --code-bg:#22262e; --code-ink:#e8eaf0;
+    --r:14px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+       background:var(--bg);color:var(--ink);line-height:1.62;font-size:16px}
+  a{color:var(--accent)}
+  /* ---------- layout ---------- */
+  .wrap{display:flex;max-width:1280px;margin:0 auto}
+  nav.side{position:sticky;top:0;align-self:flex-start;height:100vh;overflow-y:auto;
+      width:250px;flex:0 0 250px;padding:28px 10px 40px 20px;border-right:1px solid var(--line)}
+  main{flex:1;min-width:0;padding:0 44px 90px}
+  @media(max-width:900px){nav.side{display:none}main{padding:0 18px 60px}}
+  nav.side .logo{font-weight:800;font-size:15px;letter-spacing:.02em;margin-bottom:4px}
+  nav.side .logo span{color:var(--accent)}
+  nav.side .ver{font-size:11.5px;color:var(--ink-mute);margin-bottom:18px}
+  nav.side a{display:block;padding:5px 10px;margin:1px 0;border-radius:8px;color:var(--ink-soft);
+      text-decoration:none;font-size:13.5px}
+  nav.side a:hover{background:#efede8}
+  nav.side a.active{background:var(--accent-soft);color:var(--accent);font-weight:600}
+  nav.side .grp{font-size:10.5px;text-transform:uppercase;letter-spacing:.09em;color:var(--ink-mute);
+      margin:16px 0 4px 10px;font-weight:700}
+  /* ---------- hero ---------- */
+  header.hero{padding:56px 0 8px}
+  .hero .kicker{color:var(--accent);font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:.12em}
+  .hero h1{font-size:clamp(28px,4vw,40px);line-height:1.15;margin:10px 0 14px;letter-spacing:-.02em}
+  .hero p.sub{font-size:17.5px;color:var(--ink-soft);max-width:720px;margin:0 0 20px}
+  .hero .meta{display:flex;gap:10px;flex-wrap:wrap;font-size:12.5px;color:var(--ink-mute)}
+  .hero .meta span{background:var(--panel);border:1px solid var(--line);border-radius:99px;padding:4px 12px}
+  /* ---------- common ---------- */
+  section{margin-top:64px}
+  section>h2{font-size:26px;letter-spacing:-.015em;margin:0 0 6px;scroll-margin-top:24px}
+  section>p.lead{color:var(--ink-soft);max-width:760px;margin:0 0 22px;font-size:16.5px}
+  h3{font-size:18.5px;margin:34px 0 10px}
+  .num{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:8px;
+      background:var(--accent);color:#fff;font-size:14px;font-weight:700;margin-right:10px;vertical-align:-6px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:20px 22px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  @media(max-width:900px){.grid2,.grid3{grid-template-columns:1fr}}
+  .pill{display:inline-block;border-radius:99px;padding:2px 11px;font-size:12px;font-weight:700}
+  .pill.pm{background:var(--pm-bg);color:var(--pm)} .pill.sa{background:var(--sa-bg);color:var(--sa)}
+  .pill.dev{background:var(--dev-bg);color:var(--dev)} .pill.qa{background:var(--qa-bg);color:var(--qa)}
+  .pill.gate{background:#fde8e8;color:#b91c1c}
+  .pill.ai{background:#eef2f6;color:#475569}
+  code{background:#edeae3;border-radius:5px;padding:1.5px 6px;font-size:.88em;
+      font-family:"SF Mono",ui-monospace,Consolas,Menlo,monospace}
+  /* ---------- code blocks ---------- */
+  .codewrap{position:relative;margin:14px 0}
+  pre{background:var(--code-bg);color:var(--code-ink);border-radius:12px;padding:18px 20px;overflow-x:auto;
+      font-size:13px;line-height:1.55;font-family:"SF Mono",ui-monospace,Consolas,Menlo,monospace;margin:0}
+  pre .c{color:#7b8497} pre .k{color:#7fd1b9} pre .s{color:#e8c284} pre .cmd{color:#9ecbff}
+  .copybtn{position:absolute;top:10px;right:10px;background:#3a404c;color:#cdd3de;border:0;border-radius:7px;
+      padding:5px 12px;font-size:11.5px;cursor:pointer;font-family:inherit}
+  .copybtn:hover{background:#4a5160}
+  .filelabel{position:absolute;top:-9px;left:16px;background:var(--accent);color:#fff;font-size:11px;
+      font-weight:700;border-radius:6px;padding:2px 10px;letter-spacing:.03em}
+  .codewrap.labeled pre{padding-top:24px}
+  /* ---------- objections ---------- */
+  .obj{border-left:4px solid var(--accent);padding:16px 20px;background:var(--panel);
+      border-radius:0 var(--r) var(--r) 0;border-top:1px solid var(--line);border-right:1px solid var(--line);border-bottom:1px solid var(--line)}
+  .obj .q{font-weight:700;font-style:italic;margin-bottom:8px}
+  .obj .a{color:var(--ink-soft);font-size:14.5px}
+  .obj .mech{margin-top:10px;font-size:13px;color:var(--accent);font-weight:600}
+  /* ---------- cycle diagram ---------- */
+  .cycle{display:flex;align-items:stretch;gap:0;margin:22px 0;flex-wrap:wrap}
+  .cycle .box{flex:1;min-width:150px;background:var(--panel);border:1.5px solid var(--line);border-radius:12px;
+      padding:14px 16px;text-align:center}
+  .cycle .box b{display:block;font-size:14.5px}
+  .cycle .box small{color:var(--ink-mute);font-size:12px;line-height:1.4;display:block;margin-top:4px}
+  .cycle .arr{display:flex;align-items:center;padding:0 10px;color:var(--accent);font-size:22px;font-weight:700}
+  .cycle .box.hl{border-color:var(--accent);background:var(--accent-soft)}
+  /* ---------- timeline ---------- */
+  .tl{position:relative;margin:26px 0 0;padding-left:0;list-style:none}
+  .step{position:relative;display:flex;gap:18px;padding:0 0 30px}
+  .step .rail{flex:0 0 44px;display:flex;flex-direction:column;align-items:center}
+  .step .dot{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+      font-weight:800;font-size:15px;color:#fff;flex:0 0 44px;box-shadow:0 1px 3px rgba(0,0,0,.18)}
+  .step .line{width:2.5px;flex:1;background:var(--line);margin-top:6px}
+  .step:last-child .line{display:none}
+  .step .body{flex:1;min-width:0}
+  .step .body .card{padding:16px 20px}
+  .step h4{margin:0 0 3px;font-size:16.5px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .step .who{font-size:12.5px;color:var(--ink-mute);margin-bottom:8px}
+  .step p{margin:6px 0;font-size:14.5px;color:var(--ink-soft)}
+  .step .cmdline{background:var(--code-bg);color:#9ecbff;border-radius:8px;padding:8px 14px;font-size:12.5px;
+      font-family:"SF Mono",ui-monospace,Consolas,Menlo,monospace;margin:8px 0 2px;overflow-x:auto;white-space:nowrap}
+  .step .cmdline b{color:#e8c284;font-weight:600}
+  .gatechip{display:inline-flex;align-items:center;gap:6px;background:#fde8e8;color:#b91c1c;border-radius:99px;
+      padding:3px 12px;font-size:12px;font-weight:700}
+  .d-pm{background:var(--pm)} .d-sa{background:var(--sa)} .d-dev{background:var(--dev)} .d-qa{background:var(--qa)}
+  .d-gate{background:#b91c1c}
+  /* ---------- roles ---------- */
+  .role{border-top:4px solid;padding-top:16px}
+  .role.pm{border-color:var(--pm)} .role.sa{border-color:var(--sa)}
+  .role.dev{border-color:var(--dev)} .role.qa{border-color:var(--qa)}
+  .role h3{margin:0 0 2px;font-size:19px}
+  .role .tag{font-size:12.5px;color:var(--ink-mute);margin-bottom:12px}
+  .role ul{margin:8px 0;padding-left:18px;font-size:14px;color:var(--ink-soft)}
+  .role ul li{margin:5px 0}
+  .role .own{font-size:13px;font-weight:700;margin-top:12px;padding:10px 12px;border-radius:9px}
+  .role.pm .own{background:var(--pm-bg);color:var(--pm)} .role.sa .own{background:var(--sa-bg);color:var(--sa)}
+  .role.dev .own{background:var(--dev-bg);color:var(--dev)} .role.qa .own{background:var(--qa-bg);color:var(--qa)}
+  .role .sec{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-mute);font-weight:700;margin-top:14px}
+  /* ---------- tables ---------- */
+  table{border-collapse:collapse;width:100%;margin:16px 0;background:var(--panel);border-radius:12px;overflow:hidden;
+      border:1px solid var(--line);font-size:13.5px}
+  th{background:#efede8;text-align:left;padding:10px 14px;font-size:12.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-soft)}
+  td{padding:10px 14px;border-top:1px solid var(--line);vertical-align:top}
+  td.c,th.c{text-align:center}
+  .raci{display:inline-block;width:26px;height:26px;line-height:26px;text-align:center;border-radius:7px;font-weight:800;font-size:12.5px}
+  .raci.R{background:#0f4c5c;color:#fff}.raci.A{background:#fde8e8;color:#b91c1c}
+  .raci.C{background:#edeae3;color:#4b5563}.raci.I{background:transparent;color:#b6bcc6;border:1px dashed #d5d9e0}
+  /* ---------- gates ---------- */
+  .gate-card{border:1px solid var(--line);border-radius:var(--r);background:var(--panel);margin:14px 0;overflow:hidden}
+  .gate-card .head{display:flex;align-items:center;gap:12px;padding:14px 20px;background:#fbfaf7;border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .gate-card .head b{font-size:15.5px}
+  .gate-card .head .g{background:#b91c1c;color:#fff;border-radius:8px;font-weight:800;font-size:13px;padding:3px 10px}
+  .gate-card ul{list-style:none;margin:0;padding:12px 20px 16px}
+  .gate-card li{padding:6px 0 6px 30px;position:relative;font-size:14.5px;color:var(--ink-soft)}
+  .gate-card li::before{content:"";position:absolute;left:0;top:9px;width:17px;height:17px;border:2px solid #c9cdd6;border-radius:5px}
+  .gate-card .who-check{margin-left:auto;font-size:12.5px;color:var(--ink-mute)}
+  /* ---------- callouts ---------- */
+  .note{border-radius:12px;padding:14px 18px;margin:16px 0;font-size:14.5px;border:1px solid}
+  .note.info{background:var(--accent-soft);border-color:#c3d9df;color:#123f4c}
+  .note.warn{background:#fdf3e3;border-color:#ecd9b7;color:#7c4a09}
+  .note b{font-weight:700}
+  /* ---------- misc ---------- */
+  .qref td code{white-space:nowrap}
+  details{background:var(--panel);border:1px solid var(--line);border-radius:12px;margin:10px 0;padding:0}
+  details summary{cursor:pointer;padding:14px 20px;font-weight:600;font-size:14.5px;list-style:none;display:flex;align-items:center;gap:10px}
+  details summary::before{content:"▸";color:var(--accent);transition:transform .15s}
+  details[open] summary::before{transform:rotate(90deg)}
+  details .inner{padding:2px 20px 16px;font-size:14.5px;color:var(--ink-soft)}
+  footer{margin-top:80px;padding-top:24px;border-top:1px solid var(--line);font-size:12.5px;color:var(--ink-mute)}
+  @media print{
+    nav.side{display:none} main{padding:0} body{background:#fff;font-size:12px}
+    .copybtn{display:none} section{margin-top:34px} .step{break-inside:avoid} .gate-card{break-inside:avoid}
+    pre{white-space:pre-wrap}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+<nav class="side" id="sidenav">
+  <div class="logo">SDD <span>Playbook</span></div>
+  <div class="ver">OpenSpec · GigaCode · v1.0 · авг 2026</div>
+  <div class="grp">Основы</div>
+  <a href="#why">Зачем это всё</a>
+  <a href="#model">Как устроен OpenSpec</a>
+  <div class="grp">Workflow</div>
+  <a href="#workflow">Workflow: 9 шагов</a>
+  <a href="#roles">Роли и владение</a>
+  <a href="#raci">RACI</a>
+  <a href="#howto">Работа по шагам</a>
+  <div class="grp">Контроль качества</div>
+  <a href="#gates">Гейты и чек-листы</a>
+  <a href="#situations">Типовые ситуации</a>
+  <div class="grp">Инструменты</div>
+  <a href="#commands">Команды простыми словами</a>
+  <a href="#demo">Демо-проект</a>
+  <a href="#cheatsheet">Шпаргалка команд</a>
+  <div class="grp">Материалы</div>
+  <a href="#pack">Стартовый пакет</a>
+  <a href="#mainspec">Main spec: два сценария</a>
+  <a href="#adoption">Внедрение и метрики</a>
+</nav>
+<main>
+
+<header class="hero">
+  <div class="kicker">Playbook команды</div>
+  <h1>Spec-Driven разработка с&nbsp;ИИ на&nbsp;базе OpenSpec</h1>
+  <p class="sub">Единый рабочий цикл для PM, системного аналитика, разработчика и QA:
+     кто какой артефакт создаёт, каким инструментом, кто и по каким критериям принимает.
+     ИИ делает черновики — люди владеют контрактами и решают, что значит «готово».</p>
+  <div class="meta">
+    <span>OpenSpec ≥ 1.8</span><span>GigaCode</span>
+    <span>Модели: DeepSeek · Qwen · GLM</span><span>Схема workflow: sdd-roles</span>
+  </div>
+</header>
+<nav class="card" id="toc" style="margin-top:34px;padding:22px 26px">
+  <div style="font-size:12px;text-transform:uppercase;letter-spacing:.09em;color:var(--ink-mute);font-weight:700;margin-bottom:10px">Оглавление</div>
+  <ol style="columns:2;column-gap:40px;margin:0;padding-left:20px;font-size:14.5px;line-height:2">
+    <li><a href="#why" style="text-decoration:none">Зачем это всё</a></li>
+    <li><a href="#model" style="text-decoration:none">Как устроен OpenSpec — за 2 минуты</a></li>
+    <li><a href="#workflow" style="text-decoration:none">Workflow команды: 9 шагов, 4 роли, 6 гейтов</a></li>
+    <li><a href="#roles" style="text-decoration:none">Роли: кто чем владеет</a></li>
+    <li><a href="#raci" style="text-decoration:none">RACI по артефактам</a></li>
+    <li><a href="#howto" style="text-decoration:none">Работа по шагам: команды по ролям</a></li>
+    <li><a href="#gates" style="text-decoration:none">Гейты: чек-листы приёмки</a></li>
+    <li><a href="#situations" style="text-decoration:none">Типовые ситуации</a></li>
+    <li><a href="#commands" style="text-decoration:none">Команды простыми словами</a></li>
+    <li><a href="#demo" style="text-decoration:none">Демо-проект: цикл в реальности</a></li>
+    <li><a href="#cheatsheet" style="text-decoration:none">Шпаргалка команд</a></li>
+    <li><a href="#pack" style="text-decoration:none">Стартовый пакет</a></li>
+    <li><a href="#mainspec" style="text-decoration:none">Main spec: два сценария старта</a></li>
+    <li><a href="#adoption" style="text-decoration:none">Внедрение и метрики</a></li>
+  </ol>
+</nav>
+
+
+<!-- ============================ WHY ============================ -->
+<section id="why">
+  <h2>Зачем это всё</h2>
+  <p class="lead">Workflow держится на трёх инженерных принципах. Они определяют, как устроен каждый шаг
+  цикла и каждый гейт этого playbook.</p>
+  <div class="grid3">
+    <div class="obj">
+      <div class="q">Проверяемость вместо доверия</div>
+      <div class="a">Качество результата обеспечивается не верой в модель, а дешёвой проверкой:
+        каждый артефакт проходит гейт с чек-листом, спека валидируется командой
+        <code>openspec validate --strict</code>, реализация сверяется с артефактами через
+        <code>/opsx-verify</code>. Проверка встроена в цикл и занимает минуты.</div>
+      <div class="mech">→ Механизм: гейты G0–G6, validate, verify</div>
+    </div>
+    <div class="obj">
+      <div class="q">Полнота — это definition of done</div>
+      <div class="a">Полнота — свойство критериев приёмки, а не ответа модели. У каждого артефакта
+        есть чек-лист: что обязано быть в спеке, в тест-модели, в design.
+        <code>/opsx-verify</code> меряет полноту против tasks и сценариев — а не «на глаз».</div>
+      <div class="mech">→ Механизм: чек-листы артефактов + verify (completeness)</div>
+    </div>
+    <div class="obj">
+      <div class="q">Интент — от человека, контекст — из спек</div>
+      <div class="a">PM формулирует бизнес-интент. Технический контекст живёт в main spec
+        (<code>openspec/specs/</code>) и в <code>config.yaml</code> — и подтягивается в каждый промпт
+        автоматически. Никто не диктует модели детали архитектуры руками.</div>
+      <div class="mech">→ Механизм: main spec + context-инъекция config.yaml</div>
+    </div>
+  </div>
+
+  <h3>Модель работы: ИИ — черновик, человек — владелец</h3>
+  <p style="max-width:760px;color:var(--ink-soft)">Официальная модель OpenSpec: <em>человек даёт интент и ограничения → агент делает
+  черновик → человек затачивает</em> («draft, sharpen, repeat»). Ни один артефакт не считается готовым, потому
+  что «модель так сказала» — готовым его делает подпись владельца роли на гейте. Аналитик владеет
+  source of truth, который потребляют ИИ-агенты всех остальных ролей; QA определяет качество контракта до того, как
+  написана первая строчка кода; разработчик отвечает за то, что попадает в main.</p>
+</section>
+
+<!-- ============================ MODEL ============================ -->
+<section id="model">
+  <h2>Как устроен OpenSpec — за 2 минуты</h2>
+  <p class="lead">OpenSpec хранит требования не в чатах и не в головах, а в git — рядом с кодом.
+  Две ключевые папки и один цикл.</p>
+
+  <div class="cycle">
+    <div class="box hl"><b>openspec/specs/</b><small>Main spec — источник истины.<br>Как система ведёт себя <em>сейчас</em></small></div>
+    <div class="arr">→</div>
+    <div class="box"><b>openspec/changes/&lt;имя&gt;/</b><small>Change — предлагаемое изменение:<br>proposal · specs-дельты · design · tasks</small></div>
+    <div class="arr">→</div>
+    <div class="box"><b>Реализация</b><small>apply: код пишется по tasks,<br>спека и код в одной ветке / PR</small></div>
+    <div class="arr">→</div>
+    <div class="box"><b>Archive</b><small>Дельты вливаются в specs/,<br>change уходит в архив с датой</small></div>
+  </div>
+
+  <p style="color:var(--ink-soft);max-width:760px">После archive main spec снова описывает актуальное поведение — и следующий change строится уже
+  на нём. Спека не устаревает, потому что её обновление — часть цикла, а не отдельная повинность.</p>
+
+  <h3>Формат спеки: требование + сценарии</h3>
+  <div class="codewrap labeled"><span class="filelabel">openspec/specs/&lt;capability&gt;/spec.md</span>
+<pre><span class="c">## Requirements</span>
+
+<span class="k">### Requirement: Session Timeout</span>
+Система SHALL завершать сессию после 30 минут неактивности.
+
+<span class="k">#### Scenario: Idle timeout</span>
+- GIVEN аутентифицированная сессия
+- WHEN проходит 30 минут без активности
+- THEN сессия инвалидируется
+- AND пользователь должен пройти аутентификацию заново</pre>
+<button class="copybtn">Копировать</button></div>
+
+  <div class="grid2" style="margin-top:16px">
+    <div class="card">
+      <b>Требование</b> — одно наблюдаемое поведение с ключевым словом RFC&nbsp;2119
+      (<code>SHALL</code>/<code>MUST</code> — обязательно, <code>SHOULD</code> — рекомендация,
+      <code>MAY</code> — опционально). Тест: <em>сможет ли тестировщик, не видевший кода, сказать, выполняется оно или нет?</em>
+    </div>
+    <div class="card">
+      <b>Сценарий</b> — конкретный GIVEN/WHEN/THEN, который можно превратить в автотест.
+      Покрывает не только happy path: пустой ввод, просроченный токен, повторный клик.
+      <b>Сценарии спеки — это и есть будущая тестовая модель QA.</b>
+    </div>
+  </div>
+
+  <h3>Дельты: change описывает разницу, а не всю спеку</h3>
+  <table>
+    <tr><th>Секция дельты</th><th>Смысл</th><th>Что происходит при archive</th></tr>
+    <tr><td><code>## ADDED Requirements</code></td><td>новое поведение</td><td>добавляется в main spec</td></tr>
+    <tr><td><code>## MODIFIED Requirements</code></td><td>существующее поведение меняется (приводится целиком)</td><td>заменяет старую версию</td></tr>
+    <tr><td><code>## REMOVED Requirements</code></td><td>поведение уходит (с причиной)</td><td>удаляется из main spec</td></tr>
+    <tr><td><code>## Purpose</code></td><td>назначение новой capability</td><td>становится Purpose новой спеки</td></tr>
+  </table>
+  <div class="note info"><b>Почему дельты — это важно для команды:</b> два change'а могут менять одну спеку параллельно,
+  не мешая друг другу, пока не трогают одно и то же требование. А если трогают — конфликт при archive
+  это не баг, а сигнал: два изменения по-разному понимают, как должна себя вести система. Разбирает аналитик.</div>
+</section>
+
+<!-- ============================ WORKFLOW ============================ -->
+<section id="workflow">
+  <h2>Workflow команды: 9 шагов, 4 роли, 6 гейтов</h2>
+  <p class="lead">Один change — одна ветка — один PR. Каждый шаг: кто делает, какой командой, что на выходе,
+  кто принимает. Кастомная схема <code>sdd-roles</code> (см. <a href="#pack">стартовый пакет</a>) выстраивает
+  артефакты именно в этом порядке.</p>
+
+  <div class="card" style="padding:22px 18px 12px;margin-bottom:10px;overflow-x:auto">
+  <svg viewBox="0 0 1060 400" style="width:100%;min-width:860px;height:auto;font-family:inherit" role="img" aria-label="Схема workflow по ролям">
+    <defs>
+      <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+        <path d="M0,0 L10,5 L0,10 z" fill="#6b7280"/>
+      </marker>
+    </defs>
+    <!-- lanes -->
+    <rect x="78" y="28"  width="972" height="84" rx="10" fill="var(--pm-bg)"  opacity=".55"/>
+    <rect x="78" y="120" width="972" height="84" rx="10" fill="var(--sa-bg)"  opacity=".55"/>
+    <rect x="78" y="212" width="972" height="84" rx="10" fill="var(--dev-bg)" opacity=".55"/>
+    <rect x="78" y="304" width="972" height="84" rx="10" fill="var(--qa-bg)"  opacity=".55"/>
+    <text x="40" y="75"  text-anchor="middle" font-size="14" font-weight="800" fill="var(--pm)">PM</text>
+    <text x="40" y="167" text-anchor="middle" font-size="14" font-weight="800" fill="var(--sa)">СА</text>
+    <text x="40" y="259" text-anchor="middle" font-size="14" font-weight="800" fill="var(--dev)">Dev</text>
+    <text x="40" y="351" text-anchor="middle" font-size="14" font-weight="800" fill="var(--qa)">QA</text>
+    <!-- arrows -->
+    <g fill="none" stroke="#6b7280" stroke-width="1.8" marker-end="url(#arr)">
+      <path d="M 189 70 L 196 70 L 196 162 L 201 162"/>
+      <path d="M 301 162 L 313 162"/>
+      <path d="M 413 162 L 425 162"/>
+      <path d="M 525 162 L 532 162 L 532 254 L 537 254"/>
+      <path d="M 364 188 L 364 346 L 537 346"/>
+      <path d="M 637 254 L 649 254"/>
+      <path d="M 637 346 L 761 346"/>
+      <path d="M 700 280 L 700 313 L 812 313 L 812 318"/>
+      <path d="M 861 346 L 924 346 L 924 190"/>
+      <path d="M 973 162 L 996 162" stroke-dasharray="4 3"/>
+    </g>
+    <!-- nodes: (cx,cy) w98 h52 -->
+    <g text-anchor="middle">
+      <g><rect x="91"  y="44"  width="98" height="52" rx="10" fill="#fff" stroke="var(--pm)" stroke-width="1.6"/>
+         <text x="140" y="66"  font-size="11.5" font-weight="700" fill="var(--ink)">0 · Интент-бриф</text>
+         <text x="140" y="82"  font-size="9.5" fill="var(--ink-mute)">шаблон, без CLI</text></g>
+      <g><rect x="203" y="136" width="98" height="52" rx="10" fill="#fff" stroke="var(--sa)" stroke-width="1.6"/>
+         <text x="252" y="158" font-size="11.5" font-weight="700" fill="var(--ink)">1 · Proposal</text>
+         <text x="252" y="174" font-size="9.5" fill="var(--ink-mute)">new → continue</text></g>
+      <g><rect x="315" y="136" width="98" height="52" rx="10" fill="#fff" stroke="var(--sa)" stroke-width="1.6"/>
+         <text x="364" y="158" font-size="11.5" font-weight="700" fill="var(--ink)">2 · Specs</text>
+         <text x="364" y="174" font-size="9.5" fill="var(--ink-mute)">continue</text></g>
+      <g><rect x="427" y="136" width="98" height="52" rx="10" fill="#fff" stroke="var(--sa)" stroke-width="1.6"/>
+         <text x="476" y="153" font-size="11.5" font-weight="700" fill="var(--ink)">3 · Solution</text>
+         <text x="476" y="166" font-size="11.5" font-weight="700" fill="var(--ink)">design</text>
+         <text x="476" y="180" font-size="9.5" fill="var(--ink-mute)">continue</text></g>
+      <g><rect x="539" y="228" width="98" height="52" rx="10" fill="#fff" stroke="var(--dev)" stroke-width="1.6"/>
+         <text x="588" y="250" font-size="11.5" font-weight="700" fill="var(--ink)">4 · Tech design</text>
+         <text x="588" y="266" font-size="9.5" fill="var(--ink-mute)">continue</text></g>
+      <g><rect x="539" y="320" width="98" height="52" rx="10" fill="#fff" stroke="var(--qa)" stroke-width="1.6"/>
+         <text x="588" y="342" font-size="11.5" font-weight="700" fill="var(--ink)">5 · Test model</text>
+         <text x="588" y="358" font-size="9.5" fill="var(--ink-mute)">continue</text></g>
+      <g><rect x="651" y="228" width="98" height="52" rx="10" fill="#fff" stroke="var(--dev)" stroke-width="1.6"/>
+         <text x="700" y="250" font-size="11.5" font-weight="700" fill="var(--ink)">6 · Tasks + код</text>
+         <text x="700" y="266" font-size="9.5" fill="var(--ink-mute)">continue → apply</text></g>
+      <g><rect x="763" y="320" width="98" height="52" rx="10" fill="#fff" stroke="var(--qa)" stroke-width="1.6"/>
+         <text x="812" y="342" font-size="11.5" font-weight="700" fill="var(--ink)">7 · Verify</text>
+         <text x="812" y="358" font-size="9.5" fill="var(--ink-mute)">verify + автотесты</text></g>
+      <g><rect x="875" y="136" width="98" height="52" rx="10" fill="#fff" stroke="var(--sa)" stroke-width="1.6"/>
+         <text x="924" y="158" font-size="11.5" font-weight="700" fill="var(--ink)">8 · Archive</text>
+         <text x="924" y="174" font-size="9.5" fill="var(--ink-mute)">archive</text></g>
+    </g>
+    <!-- gates -->
+    <g>
+      <g transform="translate(196,116) rotate(45)"><rect x="-7" y="-7" width="14" height="14" rx="3" fill="#b91c1c"/></g>
+      <text x="210" y="120" font-size="10.5" font-weight="800" fill="#b91c1c">G0</text>
+      <g transform="translate(308,162) rotate(45)"><rect x="-7" y="-7" width="14" height="14" rx="3" fill="#b91c1c"/></g>
+      <text x="308" y="147" text-anchor="middle" font-size="10.5" font-weight="800" fill="#b91c1c">G1</text>
+      <g transform="translate(420,162) rotate(45)"><rect x="-7" y="-7" width="14" height="14" rx="3" fill="#b91c1c"/></g>
+      <text x="420" y="147" text-anchor="middle" font-size="10.5" font-weight="800" fill="#b91c1c">G2</text>
+      <g transform="translate(532,210) rotate(45)"><rect x="-7" y="-7" width="14" height="14" rx="3" fill="#b91c1c"/></g>
+      <text x="546" y="214" font-size="10.5" font-weight="800" fill="#b91c1c">G3a</text>
+      <g transform="translate(644,254) rotate(45)"><rect x="-7" y="-7" width="14" height="14" rx="3" fill="#b91c1c"/></g>
+      <text x="644" y="239" text-anchor="middle" font-size="10.5" font-weight="800" fill="#b91c1c">G3b</text>
+      <g transform="translate(756,313) rotate(45)"><rect x="-7" y="-7" width="14" height="14" rx="3" fill="#b91c1c"/></g>
+      <text x="756" y="298" text-anchor="middle" font-size="10.5" font-weight="800" fill="#b91c1c">G4</text>
+      <g transform="translate(892,346) rotate(45)"><rect x="-7" y="-7" width="14" height="14" rx="3" fill="#b91c1c"/></g>
+      <text x="892" y="331" text-anchor="middle" font-size="10.5" font-weight="800" fill="#b91c1c">G5</text>
+      <g transform="translate(985,162) rotate(45)"><rect x="-7" y="-7" width="14" height="14" rx="3" fill="#b91c1c"/></g>
+      <text x="985" y="147" text-anchor="middle" font-size="10.5" font-weight="800" fill="#b91c1c">G6</text>
+    </g>
+    <text x="588" y="303" text-anchor="middle" font-size="10" font-style="italic" fill="var(--ink-mute)">шаги 4 и 5 — параллельно</text>
+    <text x="1002" y="150" font-size="9.5" fill="var(--ink-mute)">main spec</text>
+    <text x="1002" y="162" font-size="9.5" fill="var(--ink-mute)">обновлён ✓</text>
+  </svg>
+  <p style="font-size:12.5px;color:var(--ink-mute);margin:10px 6px 6px">
+    Прямоугольник — артефакт и команда, которой он создаётся (все команды — <code>/opsx-…</code> в чате GigaCode;
+    подробно — в <a href="#commands">«Командах простыми словами»</a>). Красный ромб — гейт: контрольная точка
+    с чек-листом (см. <a href="#gates">«Гейты»</a>). После G6 дельты влиты в main spec — цикл замыкается,
+    следующий change строится уже на обновлённой спеке.</p>
+  </div>
+
+  <ol class="tl">
+    <li class="step">
+      <div class="rail"><div class="dot d-pm">0</div><div class="line"></div></div>
+      <div class="body"><div class="card">
+        <h4>Интент-бриф <span class="pill pm">PM</span></h4>
+        <div class="who">Инструмент: чат-LLM (DeepSeek/Qwen/GLM) по шаблону · CLI не нужен</div>
+        <p>PM формулирует: проблема и ценность, для кого, критерии успеха, scope in/out,
+        именованные кейсы («что обидно сломать»), ограничения. Устные и письменные требования не запрещены —
+        они <em>канализируются</em> в бриф. Это единственный новый артефакт для PM.</p>
+        <p><span class="gatechip">Гейт G0 · бриф полон по чек-листу</span></p>
+      </div></div>
+    </li>
+    <li class="step">
+      <div class="rail"><div class="dot d-sa">1</div><div class="line"></div></div>
+      <div class="body"><div class="card">
+        <h4>Change + Proposal <span class="pill sa">Системный аналитик</span> <span class="pill ai">ИИ — черновик</span></h4>
+        <div class="who">Инструмент: GigaCode + OpenSpec</div>
+        <div class="cmdline">git switch -c <b>add-payment-limit</b> &nbsp;·&nbsp; /opsx-new <b>add-payment-limit</b> &nbsp;·&nbsp; /opsx-continue</div>
+        <p>Аналитик создаёт change и генерирует <code>proposal.md</code> из брифа PM: зачем, что меняем,
+        границы. Ссылка на бриф — обязательна. Один интент — одно предложение; если нужно «а ещё» — это два change'а.</p>
+        <p><span class="gatechip">Гейт G1 · PM подписывает proposal</span></p>
+      </div></div>
+    </li>
+    <li class="step">
+      <div class="rail"><div class="dot d-sa">2</div><div class="line"></div></div>
+      <div class="body"><div class="card">
+        <h4>Спеки (дельты требований) <span class="pill sa">Системный аналитик</span> <span class="pill ai">ИИ — черновик</span></h4>
+        <div class="who">Инструмент: GigaCode + OpenSpec · контекст из main spec подтягивается автоматически</div>
+        <div class="cmdline">/opsx-continue &nbsp;→&nbsp; правка руками &nbsp;→&nbsp; openspec validate <b>add-payment-limit</b> --strict</div>
+        <p>ИИ генерирует требования и сценарии, аналитик затачивает: один SHALL на требование, наблюдаемое
+        поведение без деталей реализации, сценарии на негатив и границы. Правильный тип дельты: ADDED / MODIFIED / REMOVED.</p>
+        <p><span class="gatechip">Гейт G2 · validate --strict + QA подтверждает тестируемость сценариев</span></p>
+      </div></div>
+    </li>
+    <li class="step">
+      <div class="rail"><div class="dot d-sa">3</div><div class="line"></div></div>
+      <div class="body"><div class="card">
+        <h4>Solution design <span class="pill sa">Системный аналитик</span> <span class="pill ai">ИИ — черновик</span></h4>
+        <div class="who">Уровень СА: алгоритмы, структуры данных, контракты интеграций — без кода</div>
+        <div class="cmdline">/opsx-continue</div>
+        <p><code>solution-design.md</code> — прикладное решение: алгоритмы, модель данных, контракты,
+        нефункциональные ограничения. Именно здесь живёт экспертиза аналитика-архитектора; в код документ не лезет.</p>
+        <p><span class="gatechip">Гейт G3a · ревью техлида/архитектора</span></p>
+      </div></div>
+    </li>
+    <li class="step">
+      <div class="rail"><div class="dot d-dev">4</div><div class="line"></div></div>
+      <div class="body"><div class="card">
+        <h4>Tech design <span class="pill dev">Разработчик</span> <span class="pill ai">ИИ — черновик</span></h4>
+        <div class="who">Требует: specs + solution-design · параллельно QA делает шаг 5</div>
+        <div class="cmdline">/opsx-continue</div>
+        <p><code>tech-design.md</code> — перевод solution design на уровень кодовой базы: модули, изменяемые файлы,
+        зависимости. Каждое отклонение от solution design фиксируется явно — это вход для ревью аналитика.</p>
+        <p><span class="gatechip">Гейт G3b · СА проверяет соответствие solution design</span></p>
+      </div></div>
+    </li>
+    <li class="step">
+      <div class="rail"><div class="dot d-qa">5</div><div class="line"></div></div>
+      <div class="body"><div class="card">
+        <h4>Тест-модель <span class="pill qa">QA</span> <span class="pill ai">ИИ — черновик</span> <em style="font-size:12px;color:var(--ink-mute)">параллельно с шагом 4</em></h4>
+        <div class="who">Требует: только specs — строится из сценариев, НЕ из кода</div>
+        <div class="cmdline">/opsx-continue</div>
+        <p><code>test-model.md</code> выводится из сценариев спеки до готовности кода — иначе тесты
+        подтверждают баги, а не требования. Каждый кейс трассируется на Requirement/Scenario; отмечено, что
+        уходит в автотесты. Из этой модели потом генерируются автотесты.</p>
+      </div></div>
+    </li>
+    <li class="step">
+      <div class="rail"><div class="dot d-dev">6</div><div class="line"></div></div>
+      <div class="body"><div class="card">
+        <h4>Tasks + реализация <span class="pill dev">Разработчик</span> <span class="pill ai">ИИ — код</span></h4>
+        <div class="who">Инструмент: GigaCode · ИИ пишет код по tasks, разработчик ревьюит каждый diff</div>
+        <div class="cmdline">/opsx-continue &nbsp;→&nbsp; /opsx-apply &nbsp;→&nbsp; git commit → PR</div>
+        <p><code>tasks.md</code> — чек-лист шагов ≤ одной сессии каждый. <code>/opsx-apply</code> ведёт реализацию,
+        отмечая выполненное. В PR попадают <b>и спека, и код</b> — ревьюер читает в порядке:
+        proposal → дельта спеки → код. Узнали новое по ходу — <code>/opsx-update</code> правит план, не наоборот.</p>
+        <p><span class="gatechip">Гейт G4 · code review PR (спека + код вместе)</span></p>
+      </div></div>
+    </li>
+    <li class="step">
+      <div class="rail"><div class="dot d-qa">7</div><div class="line"></div></div>
+      <div class="body"><div class="card">
+        <h4>Верификация <span class="pill qa">QA</span> <span class="pill dev">Разработчик</span></h4>
+        <div class="who">Автотесты из тест-модели + сверка реализации с артефактами</div>
+        <div class="cmdline">/opsx-verify &nbsp;·&nbsp; прогон автотестов по test-model.md</div>
+        <p><code>/opsx-verify</code> сверяет реализацию по трём измерениям: <b>completeness</b> (все tasks, требования
+        и сценарии закрыты), <b>correctness</b> (код соответствует интенту спеки), <b>coherence</b> (решения из design
+        отражены в коде). Замечания: CRITICAL / WARNING / SUGGESTION.</p>
+        <p><span class="gatechip">Гейт G5 · 0 critical, warnings разобраны, тест-модель прогнана</span></p>
+      </div></div>
+    </li>
+    <li class="step">
+      <div class="rail"><div class="dot d-sa">8</div><div class="line"></div></div>
+      <div class="body"><div class="card">
+        <h4>Archive <span class="pill sa">Системный аналитик</span></h4>
+        <div class="who">После мерджа PR в main · дельты вливаются в openspec/specs/</div>
+        <div class="cmdline">/opsx-archive &nbsp;<span style="color:#7b8497">или</span>&nbsp; openspec archive <b>add-payment-limit</b> --yes</div>
+        <p>Main spec обновлён, change с полным контекстом (зачем/что/как) уехал в
+        <code>changes/archive/2026-08-11-add-payment-limit/</code>. Через полгода любой сможет понять,
+        почему код выглядит именно так.</p>
+        <p><span class="gatechip">Гейт G6 · только после мерджа · конфликты спек разбирает СА</span></p>
+      </div></div>
+    </li>
+  </ol>
+
+  <div class="note warn"><b>Право на «лайт»-режим.</b> Опечатка или однострочный фикс не требует шести артефактов —
+  соразмеряйте церемонию с риском. Для тривиальных правок допустим <code>/opsx-ff</code> (все артефакты одним махом)
+  или change c <code>skip_specs: true</code>, если поведение системы не меняется. Полный цикл обязателен для всего,
+  что меняет наблюдаемое поведение, контракты API или данные.</div>
+</section>
+
+<!-- ============================ ROLES ============================ -->
+<section id="roles">
+  <h2>Роли: кто чем владеет</h2>
+  <p class="lead">У каждой роли — свой артефакт, свой гейт и своя причина, почему её вес в этом цикле
+  вырос, а не упал.</p>
+  <div class="grid2">
+    <div class="card role pm">
+      <h3>PM / Владелец продукта</h3>
+      <div class="tag">Владелец интента и ценности</div>
+      <div class="sec">Делает</div>
+      <ul>
+        <li>Заполняет интент-бриф (единственный новый артефакт)</li>
+        <li>Подписывает proposal на гейте G1: «это та проблема и тот scope»</li>
+        <li>Принимает результат по критериям успеха из брифа</li>
+      </ul>
+      <div class="sec">Инструменты</div>
+      <ul><li>Чат-LLM + шаблон брифа. CLI не использует</li></ul>
+      <div class="own">Смысл роли: ни одно изменение не стартует без ясного «зачем». Бриф PM — корень
+      трассировки всего change'а.</div>
+    </div>
+    <div class="card role sa">
+      <h3>Системный аналитик</h3>
+      <div class="tag">Владелец source of truth и прикладного решения</div>
+      <div class="sec">Делает</div>
+      <ul>
+        <li>Превращает бриф в proposal, спеки (требования + сценарии) и solution design</li>
+        <li>Держит main spec: archive, разбор конфликтов спек, терминология домена</li>
+        <li>Ревьюит tech design на соответствие solution design (G3b)</li>
+      </ul>
+      <div class="sec">Инструменты</div>
+      <ul><li>GigaCode + OpenSpec (opsx-команды, validate)</li></ul>
+      <div class="own">Смысл роли: спеки аналитика — контракт, который потребляют ИИ-агенты всех остальных ролей.
+      Качество их работы напрямую зависит от качества его артефактов.</div>
+    </div>
+    <div class="card role dev">
+      <h3>Разработчик</h3>
+      <div class="tag">Владелец реализации и того, что попадает в main</div>
+      <div class="sec">Делает</div>
+      <ul>
+        <li>Tech design: перевод решения на уровень кодовой базы</li>
+        <li>Ведёт /opsx-apply: ИИ пишет код, разработчик ревьюит каждый diff</li>
+        <li>Отвечает за PR: спека + код, зелёные тесты, чистая история</li>
+      </ul>
+      <div class="sec">Инструменты</div>
+      <ul><li>GigaCode + OpenSpec, обычный git-flow</li></ul>
+      <div class="own">Смысл роли: главный навык — инженерное суждение: увидеть, где сгенерированный код
+      разойдётся с системой через полгода. Ревью — это и есть работа.</div>
+    </div>
+    <div class="card role qa">
+      <h3>QA</h3>
+      <div class="tag">Владелец качества контракта и финального гейта</div>
+      <div class="sec">Делает</div>
+      <ul>
+        <li>На G2 проверяет тестируемость сценариев — до всякого кода</li>
+        <li>Строит тест-модель из спеки (не из кода!), генерирует автотесты</li>
+        <li>Ведёт /opsx-verify и держит гейт G5</li>
+      </ul>
+      <div class="sec">Инструменты</div>
+      <ul><li>GigaCode + OpenSpec, тестовый фреймворк команды</li></ul>
+      <div class="own">Смысл роли: QA смещается в начало цикла — определяет, что значит «работает»,
+      когда кода ещё нет. Дешевле всего баг ловится в сценарии спеки.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ RACI ============================ -->
+<section id="raci">
+  <h2>RACI по артефактам</h2>
+  <p class="lead">R — делает (с ИИ-черновиком), A — подписывает/отвечает, C — консультирует, I — информирован.</p>
+  <table>
+    <tr><th>Артефакт / шаг</th><th class="c">PM</th><th class="c">СА</th><th class="c">Dev</th><th class="c">QA</th></tr>
+    <tr><td>Интент-бриф</td><td class="c"><span class="raci R">R</span> <span class="raci A">A</span></td><td class="c"><span class="raci C">C</span></td><td class="c"><span class="raci I">I</span></td><td class="c"><span class="raci I">I</span></td></tr>
+    <tr><td>proposal.md</td><td class="c"><span class="raci A">A</span></td><td class="c"><span class="raci R">R</span></td><td class="c"><span class="raci C">C</span></td><td class="c"><span class="raci C">C</span></td></tr>
+    <tr><td>specs/ (дельты требований)</td><td class="c"><span class="raci C">C</span></td><td class="c"><span class="raci R">R</span> <span class="raci A">A</span></td><td class="c"><span class="raci C">C</span></td><td class="c"><span class="raci C">C</span></td></tr>
+    <tr><td>solution-design.md</td><td class="c"><span class="raci I">I</span></td><td class="c"><span class="raci R">R</span> <span class="raci A">A</span></td><td class="c"><span class="raci C">C</span></td><td class="c"><span class="raci I">I</span></td></tr>
+    <tr><td>tech-design.md</td><td class="c"><span class="raci I">I</span></td><td class="c"><span class="raci A">A</span></td><td class="c"><span class="raci R">R</span></td><td class="c"><span class="raci I">I</span></td></tr>
+    <tr><td>test-model.md</td><td class="c"><span class="raci I">I</span></td><td class="c"><span class="raci C">C</span></td><td class="c"><span class="raci C">C</span></td><td class="c"><span class="raci R">R</span> <span class="raci A">A</span></td></tr>
+    <tr><td>tasks.md + код (apply)</td><td class="c"><span class="raci I">I</span></td><td class="c"><span class="raci C">C</span></td><td class="c"><span class="raci R">R</span> <span class="raci A">A</span></td><td class="c"><span class="raci I">I</span></td></tr>
+    <tr><td>Верификация (verify + автотесты)</td><td class="c"><span class="raci I">I</span></td><td class="c"><span class="raci C">C</span></td><td class="c"><span class="raci C">C</span></td><td class="c"><span class="raci R">R</span> <span class="raci A">A</span></td></tr>
+    <tr><td>Archive (обновление main spec)</td><td class="c"><span class="raci I">I</span></td><td class="c"><span class="raci R">R</span> <span class="raci A">A</span></td><td class="c"><span class="raci I">I</span></td><td class="c"><span class="raci I">I</span></td></tr>
+  </table>
+</section>
+
+<!-- ============================ HOWTO ============================ -->
+<section id="howto">
+  <h2>Работа по шагам: команды по ролям</h2>
+  <p class="lead">Что печатать в GigaCode на каждом шаге workflow. Для каждой slash-команды есть CLI-эквивалент —
+  он же используется в скриптах и CI.</p>
+
+  <h3>Системный аналитик: от брифа до спеки</h3>
+  <div class="codewrap"><pre><span class="c"># ветка под change (имя — kebab-case, один интент)</span>
+<span class="cmd">git switch -c add-payment-limit</span>
+
+<span class="c"># в GigaCode:</span>
+/opsx-new add-payment-limit        <span class="c"># каркас change (схема sdd-roles подхватится из config.yaml)</span>
+/opsx-continue                     <span class="c"># → proposal.md (даёт ИИ бриф PM как вход!)</span>
+<span class="c">#   ...правим proposal, несём PM на подпись (G1)...</span>
+/opsx-continue                     <span class="c"># → specs/ — дельты требований со сценариями</span>
+<span class="c">#   ...затачиваем требования и сценарии...</span>
+
+<span class="c"># проверка структуры (терминал):</span>
+<span class="cmd">openspec validate add-payment-limit --strict</span>
+<span class="cmd">openspec status --change add-payment-limit</span>   <span class="c"># что готово, что заблокировано</span>
+
+/opsx-continue                     <span class="c"># → solution-design.md (уровень СА, без кода)</span></pre><button class="copybtn">Копировать</button></div>
+  <div class="note info"><b>Как «аимить» ИИ при генерации спеки:</b> назвать интент и границу
+  («…не трогая существующий API лимитов»), перечислить кейсы, которые важно покрыть, — ИИ покрывает то,
+  на что вы указали. Дальше режим «draft → sharpen»: расплывчатый SHALL уточнить, пустой сценарий удалить,
+  недостающий негативный кейс попросить добавить.</div>
+
+  <h3>Разработчик: от design до PR</h3>
+  <div class="codewrap"><pre><span class="cmd">git switch add-payment-limit</span>       <span class="c"># та же ветка, тот же change</span>
+
+/opsx-continue                     <span class="c"># → tech-design.md (требует specs + solution-design)</span>
+/opsx-continue                     <span class="c"># → tasks.md — чек-лист реализации</span>
+/opsx-apply                        <span class="c"># ИИ реализует по tasks, отмечая выполненное; ревьюим каждый diff</span>
+
+<span class="c"># план разошёлся с реальностью? правим план, а не забиваем:</span>
+/opsx-update                       <span class="c"># корректирует артефакты, код не трогает</span>
+
+<span class="cmd">git add -A && git commit -m "add-payment-limit: spec + implementation"</span>
+<span class="c"># открыть PR: в нём и спека, и код. В описание PR — ссылку на change-папку</span></pre><button class="copybtn">Копировать</button></div>
+
+  <h3>QA: тест-модель и верификация</h3>
+  <div class="codewrap"><pre><span class="c"># можно начинать сразу после гейта G2 — код не нужен:</span>
+/opsx-continue                     <span class="c"># → test-model.md из сценариев спеки</span>
+<span class="c"># ...генерация автотестов из тест-модели (GigaCode, по вашему тестовому фреймворку)...</span>
+
+<span class="c"># когда реализация готова:</span>
+/opsx-verify                       <span class="c"># completeness / correctness / coherence</span>
+<span class="c"># CRITICAL → возврат разработчику; WARNING → разобрать явно</span></pre><button class="copybtn">Копировать</button></div>
+
+  <h3>Аналитик: закрытие цикла</h3>
+  <div class="codewrap"><pre><span class="c"># после мерджа PR в main:</span>
+/opsx-archive                      <span class="c"># предложит слить дельты в specs/ и заархивирует</span>
+<span class="c"># или в терминале/CI:</span>
+<span class="cmd">openspec archive add-payment-limit --yes</span></pre><button class="copybtn">Копировать</button></div>
+
+  <h3>Если GigaCode не подхватил slash-команды</h3>
+  <p style="color:var(--ink-soft);font-size:14.5px;max-width:760px">Slash-команды — это просто markdown-файлы в <code>.qwen/commands/opsx-*.md</code>.
+  Если ваша сборка GigaCode их не видит, у OpenSpec есть машинный контракт — агенту можно давать инструкции напрямую:</p>
+  <div class="codewrap"><pre><span class="cmd">openspec status --change add-payment-limit --json</span>       <span class="c"># какой артефакт следующий</span>
+<span class="cmd">openspec instructions specs --change add-payment-limit --json</span>  <span class="c"># шаблон + контекст + правила для артефакта</span>
+<span class="cmd">openspec instructions apply --change add-payment-limit --json</span>  <span class="c"># контекст и состояние tasks для реализации</span></pre><button class="copybtn">Копировать</button></div>
+  <p style="color:var(--ink-soft);font-size:14.5px">Промпт агенту тогда выглядит так: «выполни <code>openspec instructions specs --change … --json</code>
+  и создай артефакт по полученной инструкции». Это тот же механизм, которым пользуются штатные slash-команды.</p>
+</section>
+
+<!-- ============================ GATES ============================ -->
+<section id="gates">
+  <h2>Гейты: чек-листы приёмки</h2>
+  <p class="lead">Гейт проходит артефакт, а не человек и не модель. Не прошёл — возвращается на доработку
+  с описанием дефекта. Чек-лист — это definition of done: именно он делает «полноту» измеримой.</p>
+
+  <div class="gate-card"><div class="head"><span class="g">G0</span><b>Интент-бриф полон</b><span class="who-check">Проверяет: СА</span></div>
+    <ul>
+      <li>Проблема и ценность сформулированы; понятно, для кого</li>
+      <li>Критерии успеха измеримы</li>
+      <li>Scope in и scope out указаны явно — «чего НЕ делаем» не менее важно</li>
+      <li>Названы кейсы, которые «обидно сломать»</li>
+      <li>Один интент. Если в брифе «а ещё…» — это второй change</li>
+    </ul>
+  </div>
+  <div class="gate-card"><div class="head"><span class="g">G1</span><b>Proposal подписан</b><span class="who-check">Проверяет: PM</span></div>
+    <ul>
+      <li>Интент proposal совпадает с брифом (ссылка на бриф присутствует)</li>
+      <li>Scope не разъехался: ничего не добавлено «заодно» и не потеряно</li>
+      <li>Затронутые команды/системы и rollback-план указаны</li>
+    </ul>
+  </div>
+  <div class="gate-card"><div class="head"><span class="g">G2</span><b>Спека принята</b><span class="who-check">Проверяют: СА + QA · автоматика: validate --strict</span></div>
+    <ul>
+      <li><code>openspec validate &lt;change&gt; --strict</code> проходит без ошибок</li>
+      <li>Каждое требование — одно наблюдаемое поведение, один SHALL/MUST</li>
+      <li>Формулировки — поведение, не реализация («система отклоняет платёж свыше лимита», а не «метод validate() бросает исключение»)</li>
+      <li>У каждого требования ≥ 1 сценарий; негативные и граничные случаи покрыты</li>
+      <li>QA подтверждает: каждый сценарий проверяем тестом</li>
+      <li>Тип дельты верен: ADDED — новое, MODIFIED — изменение (целиком), REMOVED — с причиной</li>
+      <li>Термины — из main spec, новые термины не изобретены без нужды</li>
+    </ul>
+  </div>
+  <div class="gate-card"><div class="head"><span class="g">G3</span><b>Design принят (a: solution / b: tech)</b><span class="who-check">Проверяют: техлид (a) · СА (b)</span></div>
+    <ul>
+      <li>Solution design без кода: алгоритмы, данные, контракты, НФТ-ограничения</li>
+      <li>Tech design ссылается на решения solution design; каждое отклонение зафиксировано явно</li>
+      <li>Ключевые решения оформлены как «Decision + почему» (альтернативы упомянуты)</li>
+    </ul>
+  </div>
+  <div class="gate-card"><div class="head"><span class="g">G4</span><b>PR принят</b><span class="who-check">Проверяет: ревьюер-разработчик</span></div>
+    <ul>
+      <li>PR содержит и спеку, и код; ревью в порядке proposal → дельта → код</li>
+      <li>Код делает ровно то, что в требованиях — не больше и не меньше</li>
+      <li>Все tasks отмечены; тесты зелёные</li>
+      <li>Несогласие с подходом высказано против proposal/design, а не против 300 строк кода</li>
+    </ul>
+  </div>
+  <div class="gate-card"><div class="head"><span class="g">G5</span><b>Верификация пройдена</b><span class="who-check">Проверяет: QA</span></div>
+    <ul>
+      <li><code>/opsx-verify</code>: 0 CRITICAL; каждый WARNING явно разобран (исправлен или принят с причиной)</li>
+      <li>Автотесты из тест-модели прогнаны; кейсы трассируются на сценарии спеки</li>
+      <li>Расхождение кода и design'а либо исправлено в коде, либо зафиксировано через /opsx-update</li>
+    </ul>
+  </div>
+  <div class="gate-card"><div class="head"><span class="g">G6</span><b>Archive выполнен</b><span class="who-check">Проверяет: СА</span></div>
+    <ul>
+      <li>PR смерджен в main — архивируем только вошедшее в продукт</li>
+      <li>Дельты влиты в openspec/specs/; конфликты спек разобраны СА содержательно</li>
+      <li>Change лежит в archive/ с датой; в специфarchive ничего не потеряно</li>
+    </ul>
+  </div>
+</section>
+<!-- ============================ SITUATIONS ============================ -->
+<section id="situations">
+  <h2>Типовые ситуации</h2>
+  <details open>
+    <summary>Реализация показала, что план был неверен</summary>
+    <div class="inner">Это норма, а не сбой: OpenSpec — «iterative not waterfall». <code>/opsx-update</code> правит
+    планирующие артефакты, сохраняя их согласованность (код не трогает). Правило: <b>код никогда не должен молча
+    расходиться со спекой</b> — либо чиним код, либо обновляем спеку через update, осознанно.</div>
+  </details>
+  <details>
+    <summary>Обновить существующий change или завести новый?</summary>
+    <div class="inner">Обновить — если интент тот же: уточнение исполнения, сужение scope (MVP сначала), поправки
+    от изучения кодовой базы. Новый change — если интент изменился, scope разросся в другую работу, или исходный
+    change можно закрыть как самостоятельный. Тест: «можно ли исходный change назвать „сделано" без этих правок?»
+    Если да — новый change.</div>
+  </details>
+  <details>
+    <summary>Два change'а конфликтуют в specs/ при archive</summary>
+    <div class="inner">Значит, два изменения по-разному описали одно требование — это фича, а не бага: git подсветил
+    рассогласование о том, как должна вести себя система. Разбирает СА содержательно (какое требование отражает
+    реальность), это обычный merge-конфликт в markdown. Для массового закрытия — <code>/opsx-bulk-archive</code>:
+    он сам находит конфликты и применяет дельты хронологически, сверяясь с тем, что реально реализовано.</div>
+  </details>
+  <details>
+    <summary>Параллельная работа и срочные врезки</summary>
+    <div class="inner">Change'и — отдельные папки и ветки, они не мешают друг другу. Прилетел срочный багфикс во время
+    работы над фичей: <code>/opsx-new fix-…</code> → <code>/opsx-ff</code> → <code>/opsx-apply</code> → archive, затем
+    <code>/opsx-apply add-payment-limit</code> — продолжит с места остановки. Правило: <b>один change — один автор</b>;
+    нужно двое — значит, это два change'а.</div>
+  </details>
+  <details>
+    <summary>Изменение не меняет поведение (рефакторинг, инфраструктура)</summary>
+    <div class="inner">В <code>.openspec.yaml</code> change'а указать <code>skip_specs: true</code> — валидатор перестанет
+    требовать дельты спек. Proposal и tasks всё равно полезны: «зачем» и «что сделано» остаются в архиве.</div>
+  </details>
+  <details>
+    <summary>Change слишком большой</summary>
+    <div class="inner">Признаки: scope в proposal читается как список несвязанных фич; ревью займёт полдня — значит,
+    его никто не сделает; половина tasks может уехать отдельно. Решение: резать по интентам. Маленькие change'и —
+    это быстрые гейты, а быстрые гейты — это доверие к процессу.</div>
+  </details>
+  <details>
+    <summary>Спека и код успели разойтись (легаси-дрейф)</summary>
+    <div class="inner">Выборочная сверка: <code>openspec show &lt;spec&gt; --json --requirements</code>, затем агент читает код
+    затронутого модуля и сверяет с требованиями — лучше не той моделью, что вела изменения. Если main spec систематически врёт —
+    это сигнал, что change'и мерджатся без archive: чинить процесс (G6), а не спеку.</div>
+  </details>
+</section>
+
+<!-- ============================ COMMANDS ============================ -->
+<section id="commands">
+  <h2>Команды простыми словами</h2>
+  <p class="lead">Что на самом деле делает каждая команда, когда её набирать и что произойдёт после.
+  Читать перед первым использованием — 10 минут.</p>
+
+  <div class="note warn"><b>Сначала — самое частое недоразумение.</b> У OpenSpec две половины, и работают они в разных местах.
+  Команды <code>openspec …</code> набираются <b>в терминале</b> — как git или npm. Команды <code>/opsx-…</code> набираются
+  <b>в чате GigaCode</b> — там же, где вы обычно пишете агенту «добавь кнопку». Slash-команда — это не программа,
+  а готовая инструкция агенту: «следуй процессу OpenSpec на этом шаге». Начните набирать <code>/</code> в чате —
+  автодополнение покажет список. Если набрать <code>/opsx-propose</code> в терминале — ничего не произойдёт, это нормально.</div>
+
+  <div class="card" style="margin:14px 0">
+    <h4 style="margin:0 0 2px"><code>/opsx-explore</code> — «давай подумаем, ничего не создавая» <span class="pill sa">СА</span> <span class="pill pm">PM</span></h4>
+    <p style="margin:8px 0 6px;font-size:14.5px;color:var(--ink-soft)"><b>Что делает:</b> свободный разговор с агентом об идее или проблеме. Агент читает код,
+    находит причины, сравнивает варианты решения. <b>Не создаёт ни файлов, ни кода</b> — это безопасный режим «подумать».</p>
+    <p style="margin:6px 0;font-size:14.5px;color:var(--ink-soft)"><b>Когда набирать:</b> есть проблема, но нет плана. «Поиск подтормаживает, не пойму почему»,
+    «как лучше сделать лимиты — на нашей стороне или в процессинге?»</p>
+    <p style="margin:6px 0 0;font-size:14.5px;color:var(--ink-soft)"><b>Что дальше:</b> когда из разговора родилась ясность — <code>/opsx-new</code> под конкретное изменение.</p>
+  </div>
+
+  <div class="card" style="margin:14px 0">
+    <h4 style="margin:0 0 2px"><code>/opsx-new имя-изменения</code> — «заведи папку под изменение» <span class="pill sa">СА</span></h4>
+    <p style="margin:8px 0 6px;font-size:14.5px;color:var(--ink-soft)"><b>Что делает:</b> создаёт каркас change'а — папку <code>openspec/changes/имя/</code>
+    с метаданными (наша схема sdd-roles подхватится из config.yaml автоматически). <b>Ничего не генерирует</b> — просто заводит место и останавливается.</p>
+    <p style="margin:6px 0;font-size:14.5px;color:var(--ink-soft)"><b>Когда набирать:</b> начало любой задачи. Имя — kebab-case, один интент:
+    <code>add-payment-limit</code>, а не <code>feature-1</code> или <code>wip</code>.</p>
+    <p style="margin:6px 0 0;font-size:14.5px;color:var(--ink-soft)"><b>Что дальше:</b> <code>/opsx-continue</code> — начнёт создавать артефакты по одному.</p>
+  </div>
+
+  <div class="card" style="margin:14px 0;border-color:var(--accent);border-width:1.5px">
+    <h4 style="margin:0 0 2px"><code>/opsx-continue</code> — «сделай следующий артефакт и остановись» <span class="pill sa">СА</span> <span class="pill dev">Dev</span> <span class="pill qa">QA</span></h4>
+    <p style="margin:8px 0 6px;font-size:14.5px;color:var(--ink-soft)"><b>Что делает:</b> агент смотрит на change: какие артефакты уже есть, какие разблокированы
+    по зависимостям схемы (например, tech-design нельзя делать, пока нет specs и solution-design). Показывает картину,
+    создаёт <b>ровно один</b> следующий артефакт — и останавливается, чтобы вы его отревьюили. Никакого кода, только документы.</p>
+    <p style="margin:6px 0;font-size:14.5px;color:var(--ink-soft)"><b>Когда набирать:</b> каждый раз, когда ваша роль должна дать свой артефакт. Это <b>главная команда
+    нашего workflow</b>: одна и та же команда у аналитика создаст proposal → specs → solution-design, у разработчика —
+    tech-design → tasks, у QA — test-model. Кто набирает — тот и получает свой шаг; схема сама знает порядок.</p>
+    <p style="margin:6px 0;font-size:14.5px;color:var(--ink-soft)"><b>Как это выглядит:</b></p>
+    <div class="codewrap"><pre><span class="c">Вы:</span>  /opsx-continue
+<span class="c">ИИ:</span>  Change: add-payment-limit · схема sdd-roles
+     Готово: proposal ✓, specs ✓, solution-design ✓
+     Доступно сейчас: tech-design, test-model
+     Создаю tech-design.md на основе specs и solution-design…
+     Готово — посмотрите и скажите, что поправить.</pre><button class="copybtn">Копировать</button></div>
+    <p style="margin:6px 0 0;font-size:14.5px;color:var(--ink-soft)"><b>Что дальше:</b> прочитать, поправить (руками или попросив агента), пройти гейт — и снова
+    <code>/opsx-continue</code> для следующего артефакта. Если артефакт заблокирован — агент скажет, чего не хватает.</p>
+  </div>
+
+  <div class="card" style="margin:14px 0">
+    <h4 style="margin:0 0 2px"><code>/opsx-propose описание</code> — «сделай сразу весь план» <span class="pill sa">СА</span></h4>
+    <p style="margin:8px 0 6px;font-size:14.5px;color:var(--ink-soft)"><b>Что делает:</b> то же, что new + все continue подряд: создаёт change и <b>все</b> планирующие
+    артефакты одним махом. Быстро, но ревьюить придётся всё сразу — промежуточных остановок нет.</p>
+    <p style="margin:6px 0 0;font-size:14.5px;color:var(--ink-soft)"><b>Когда набирать:</b> у нас — для мелких и очевидных изменений, где полный поартефактный цикл
+    избыточен. Для обычных задач — new + continue, чтобы гейты работали.</p>
+  </div>
+
+  <div class="card" style="margin:14px 0">
+    <h4 style="margin:0 0 2px"><code>/opsx-ff</code> — «прокрути планирование до конца» <span class="pill sa">СА</span> <span class="pill dev">Dev</span></h4>
+    <p style="margin:8px 0 6px;font-size:14.5px;color:var(--ink-soft)"><b>Что делает:</b> fast-forward: несколько continue подряд без остановок — создаёт все оставшиеся
+    планирующие артефакты уже заведённого change'а.</p>
+    <p style="margin:6px 0 0;font-size:14.5px;color:var(--ink-soft)"><b>Когда набирать:</b> изменение мелкое и очевидное, а change уже заведён через new. В командной
+    работе по ролям не используется — никто не ревьюит промежуточные шаги.</p>
+  </div>
+
+  <div class="card" style="margin:14px 0">
+    <h4 style="margin:0 0 2px"><code>/opsx-apply</code> — «реализуй по чек-листу» <span class="pill dev">Dev</span></h4>
+    <p style="margin:8px 0 6px;font-size:14.5px;color:var(--ink-soft)"><b>Что делает:</b> первая команда, которая <b>пишет код</b>. Агент читает tasks.md и выполняет задачи
+    по порядку, отмечая галочки. Контекст берёт из всех артефактов change'а — спека и design уже «в голове» у агента.</p>
+    <p style="margin:6px 0;font-size:14.5px;color:var(--ink-soft)"><b>Когда набирать:</b> планирование пройдено (для нас: гейты G1–G3 закрыты, tasks.md готов).
+    Прервались — повторный <code>/opsx-apply</code> продолжит с первой неотмеченной задачи, хоть завтра, хоть в новой сессии.</p>
+    <p style="margin:6px 0 0;font-size:14.5px;color:var(--ink-soft)"><b>Обязанность разработчика:</b> ревью diff'а после каждой задачи. Agent пишет — вы принимаете решение.</p>
+  </div>
+
+  <div class="card" style="margin:14px 0">
+    <h4 style="margin:0 0 2px"><code>/opsx-update</code> — «план изменился — поправь документы» <span class="pill sa">СА</span> <span class="pill dev">Dev</span></h4>
+    <p style="margin:8px 0 6px;font-size:14.5px;color:var(--ink-soft)"><b>Что делает:</b> правит планирующие артефакты, сохраняя их согласованность между собой:
+    поменяли требование — агент предложит согласованные правки в design и tasks. Каждую правку подтверждаете. <b>Код не трогает.</b></p>
+    <p style="margin:6px 0 0;font-size:14.5px;color:var(--ink-soft)"><b>Когда набирать:</b> реализация показала, что план был неверен; сузили scope; изменился подход.
+    Правило команды: код никогда не расходится со спекой молча — либо чиним код, либо /opsx-update.</p>
+  </div>
+
+  <div class="card" style="margin:14px 0">
+    <h4 style="margin:0 0 2px"><code>/opsx-verify</code> — «проверь, что сделано ровно то, что написано» <span class="pill qa">QA</span></h4>
+    <p style="margin:8px 0 6px;font-size:14.5px;color:var(--ink-soft)"><b>Что делает:</b> сверяет реализацию с артефактами по трём измерениям: completeness — все ли tasks,
+    требования и сценарии закрыты; correctness — соответствует ли код интенту спеки; coherence — отражены ли решения
+    design'а в коде. Выдаёт отчёт: CRITICAL / WARNING / SUGGESTION.</p>
+    <p style="margin:6px 0 0;font-size:14.5px;color:var(--ink-soft)"><b>Когда набирать:</b> apply завершён, перед архивированием. Сам по себе archive не блокирует —
+    но у нас это гейт G5: 0 critical, warnings разобраны.</p>
+  </div>
+
+  <div class="card" style="margin:14px 0">
+    <h4 style="margin:0 0 2px"><code>/opsx-sync</code> — «перенеси дельты в main spec, не закрывая change» <span class="pill sa">СА</span></h4>
+    <p style="margin:8px 0 6px;font-size:14.5px;color:var(--ink-soft)"><b>Что делает:</b> вливает дельты спек change'а в <code>openspec/specs/</code>, но сам change
+    оставляет активным.</p>
+    <p style="margin:6px 0 0;font-size:14.5px;color:var(--ink-soft)"><b>Когда набирать:</b> отдельно — почти никогда: archive сам предложит sync, если дельты ещё не влиты.
+    Нужен, когда main spec должен обновиться раньше, чем change закроется.</p>
+  </div>
+
+  <div class="card" style="margin:14px 0">
+    <h4 style="margin:0 0 2px"><code>/opsx-archive</code> — «закрой изменение» <span class="pill sa">СА</span></h4>
+    <p style="margin:8px 0 6px;font-size:14.5px;color:var(--ink-soft)"><b>Что делает:</b> финал цикла. Проверяет, что tasks выполнены (предупредит, если нет), предлагает
+    влить дельты в main spec, переносит папку change'а в <code>changes/archive/2026-08-11-имя/</code>. После этого main spec
+    снова описывает актуальное поведение системы.</p>
+    <p style="margin:6px 0 0;font-size:14.5px;color:var(--ink-soft)"><b>Когда набирать:</b> у нас — только после мерджа PR в main (гейт G6). Архивируем то, что реально вошло в продукт.</p>
+  </div>
+
+  <div class="card" style="margin:14px 0">
+    <h4 style="margin:0 0 2px"><code>/opsx-bulk-archive</code> — «закрой несколько изменений разом» <span class="pill sa">СА</span></h4>
+    <p style="margin:8px 0 6px;font-size:14.5px;color:var(--ink-soft)"><b>Что делает:</b> находит завершённые change'и, проверяет, не трогают ли они одни и те же спеки,
+    разруливает конфликты (сверяясь с тем, что реально реализовано в коде) и архивирует хронологически.</p>
+    <p style="margin:6px 0 0;font-size:14.5px;color:var(--ink-soft)"><b>Когда набирать:</b> накопилось несколько смердженных change'ей — например, при еженедельной уборке.</p>
+  </div>
+
+  <div class="card" style="margin:14px 0">
+    <h4 style="margin:0 0 2px"><code>/opsx-onboard</code> — «научи меня на нашем коде» <span class="pill ai">новички</span></h4>
+    <p style="margin:8px 0 6px;font-size:14.5px;color:var(--ink-soft)"><b>Что делает:</b> интерактивный тур 15–30 минут: агент проводит через полный цикл
+    propose → design → implement → archive на вашей реальной кодовой базе, объясняя каждый шаг. Результат работы —
+    настоящий, его можно оставить.</p>
+    <p style="margin:6px 0 0;font-size:14.5px;color:var(--ink-soft)"><b>Когда набирать:</b> первый день каждого члена команды в OpenSpec. Обязательный шаг недели 1 пилота.</p>
+  </div>
+
+  <div class="note info"><b>Установка и первичная настройка</b> OpenSpec (CLI, <code>openspec init</code>,
+  расширенный профиль команд, стартовый пакет) выполняются по внутренней инструкции. Playbook предполагает,
+  что команды <code>/opsx-…</code> уже доступны в GigaCode, а схема sdd-roles установлена в репозитории.</div>
+</section>
+
+<!-- ============================ DEMO ============================ -->
+<section id="demo">
+  <h2>Демо-проект: цикл в реальности</h2>
+  <p class="lead"><code>transfer-limits-demo</code> — мини-сервис внутрибанковских переводов, на котором весь цикл
+  playbook пройден по-настоящему: артефакты созданы по схеме sdd-roles, спеки проверены
+  <code>openspec validate --strict</code>, автотесты написаны из тест-модели, дельта влита в main spec командой
+  <code>openspec archive</code>. Проект поставляется zip-архивом рядом с playbook; внутри — git-история и
+  файл <code>WALKTHROUGH.md</code> с этим же маршрутом. Демо-задача: добавить <b>суточный лимит переводов со счёта</b>.</p>
+
+  <h3>Четыре точки истории git</h3>
+  <div class="grid2">
+    <div class="card"><b>1 · Начальное состояние.</b><span style="color:var(--ink-soft);font-size:14px"> Сервис переводов
+      до цикла: проверки суммы, валюты, средств; 4 теста.</span></div>
+    <div class="card"><b>2 · init + main spec.</b><span style="color:var(--ink-soft);font-size:14px"> Подключён OpenSpec,
+      схема sdd-roles; main spec наполнен и подписан СА — сценарий А раздела «Main spec».</span></div>
+    <div class="card"><b>3 · PR change'а.</b><span style="color:var(--ink-soft);font-size:14px"> Ветка
+      add-daily-transfer-limit: все артефакты + код + тесты одним PR — ревью в порядке proposal → дельта → код.</span></div>
+    <div class="card"><b>4 · Archive.</b><span style="color:var(--ink-soft);font-size:14px"> Дельта влита: в спеке
+      transfers было 4 требования — стало 5; change целиком уехал в <code>changes/archive/2026-08-11-…</code>.</span></div>
+  </div>
+
+  <h3>Маршрут по шагам: роль → команда → артефакт → гейт</h3>
+  <table>
+    <tr><th>Шаг</th><th>Роль</th><th>Команда</th><th>Артефакт в демо</th><th>Гейт</th></tr>
+    <tr><td>0</td><td><span class="pill pm">PM</span></td><td>шаблон брифа (чат-LLM)</td><td><code>docs/intent-brief-add-daily-transfer-limit.md</code></td><td>G0</td></tr>
+    <tr><td>1</td><td><span class="pill sa">СА</span></td><td><code>/opsx-new</code> → <code>/opsx-continue</code></td><td><code>…/proposal.md</code> — со ссылкой на бриф и rollback-планом</td><td>G1</td></tr>
+    <tr><td>2</td><td><span class="pill sa">СА</span></td><td><code>/opsx-continue</code></td><td><code>…/specs/transfers/spec.md</code> — ADDED, 4 сценария: негатив, граница, сброс суток, выключенный лимит</td><td>G2</td></tr>
+    <tr><td>3</td><td><span class="pill sa">СА</span></td><td><code>/opsx-continue</code></td><td><code>…/solution-design.md</code> — алгоритм, решение «журнал, а не счётчик», сутки UTC; без кода</td><td>G3a</td></tr>
+    <tr><td>4</td><td><span class="pill dev">Dev</span></td><td><code>/opsx-continue</code></td><td><code>…/tech-design.md</code> — файлы и методы; «Отклонения: нет»</td><td>G3b</td></tr>
+    <tr><td>5</td><td><span class="pill qa">QA</span></td><td><code>/opsx-continue</code></td><td><code>…/test-model.md</code> — TC-01…TC-05 с трассировкой на сценарии; TC-05 — регресс из main spec</td><td>—</td></tr>
+    <tr><td>6</td><td><span class="pill dev">Dev</span></td><td><code>/opsx-continue</code> → <code>/opsx-apply</code></td><td><code>…/tasks.md</code> (всё отмечено) + <code>src/transfers/*.py</code></td><td>G4</td></tr>
+    <tr><td>7</td><td><span class="pill qa">QA</span></td><td><code>/opsx-verify</code> + pytest</td><td><code>tests/test_transfers.py</code> — 9 passed</td><td>G5</td></tr>
+    <tr><td>8</td><td><span class="pill sa">СА</span></td><td><code>/opsx-archive</code></td><td>дельта влита в <code>openspec/specs/transfers/spec.md</code></td><td>G6</td></tr>
+  </table>
+
+  <h3>Change «в полёте»: как схема ведёт порядок</h3>
+  <p style="color:var(--ink-soft);font-size:14.5px;max-width:760px">Второй change — <code>notify-on-limit-exceeded</code> —
+  намеренно оставлен на середине (готовы proposal и specs). Статус показывает главный механизм схемы:
+  зависимости блокируют артефакты, пока не готовы их входы.</p>
+  <div class="codewrap"><pre><span class="cmd">openspec status --change notify-on-limit-exceeded</span>
+Schema: sdd-roles
+Progress: 2/6 artifacts complete
+
+[x] proposal
+[x] specs
+[ ] solution-design
+[-] tech-design (blocked by: solution-design)
+[ ] test-model
+[-] tasks (blocked by: tech-design)</pre><button class="copybtn">Копировать</button></div>
+  <p style="color:var(--ink-soft);font-size:14.5px;max-width:760px">Довести этот change до archive — готовое практическое
+  упражнение первого занятия пилота.</p>
+
+  <h3>Проверить руками — 5 минут</h3>
+  <div class="codewrap"><pre><span class="cmd">python -m pytest -q</span>                                  <span class="c"># 9 passed</span>
+<span class="cmd">openspec list --specs</span>                                <span class="c"># capability transfers</span>
+<span class="cmd">openspec validate --all --strict</span>                     <span class="c"># всё valid</span>
+<span class="cmd">openspec status --change notify-on-limit-exceeded</span>    <span class="c"># блокировки схемы</span>
+<span class="cmd">git log --oneline --graph</span>                            <span class="c"># change = ветка = PR</span></pre><button class="copybtn">Копировать</button></div>
+
+  <div class="note info"><b>Чему учит демо:</b> требование лимита стало частью источника истины только после archive;
+  порядок артефактов держит схема, а не дисциплина; тест-модель выведена из спеки — граничный кейс TC-02 родился из
+  секции брифа «что обидно сломать», а TC-05 закрепил порядок проверок из solution-design; один PR несёт спеку и код
+  вместе, и ревьюеру не приходится восстанавливать замысел по диффу.</div>
+</section>
+
+<!-- ============================ CHEATSHEET ============================ -->
+<section id="cheatsheet">
+  <h2>Шпаргалка команд</h2>
+  <p class="lead">Краткая справка. Развёрнутые объяснения каждой команды — в разделе
+  <a href="#commands">«Команды простыми словами»</a>.</p>
+  <table class="qref">
+    <tr><th>Команда в GigaCode</th><th>Что делает</th><th>Кто обычно</th></tr>
+    <tr><td><code>/opsx-explore</code></td><td>проработка идеи без артефактов (режим «подумать вместе»)</td><td><span class="pill sa">СА</span> <span class="pill pm">PM</span></td></tr>
+    <tr><td><code>/opsx-new &lt;имя&gt;</code></td><td>каркас change'а по схеме sdd-roles</td><td><span class="pill sa">СА</span></td></tr>
+    <tr><td><code>/opsx-continue</code></td><td>следующий артефакт по порядку зависимостей (по одному, с ревью)</td><td>все</td></tr>
+    <tr><td><code>/opsx-ff</code></td><td>все планирующие артефакты одним махом (для мелочей)</td><td><span class="pill sa">СА</span> <span class="pill dev">Dev</span></td></tr>
+    <tr><td><code>/opsx-apply</code></td><td>реализация по tasks.md с отметкой выполненного</td><td><span class="pill dev">Dev</span></td></tr>
+    <tr><td><code>/opsx-update</code></td><td>правка планирующих артефактов с сохранением согласованности</td><td>владелец артефакта</td></tr>
+    <tr><td><code>/opsx-verify</code></td><td>сверка реализации: completeness / correctness / coherence</td><td><span class="pill qa">QA</span></td></tr>
+    <tr><td><code>/opsx-archive</code></td><td>слить дельты в main spec, увезти change в архив</td><td><span class="pill sa">СА</span></td></tr>
+    <tr><td><code>/opsx-bulk-archive</code></td><td>архивировать несколько change'ей, разрулив конфликты спек</td><td><span class="pill sa">СА</span></td></tr>
+    <tr><td><code>/opsx-onboard</code></td><td>интерактивный тур по циклу на вашем коде (15–30 мин)</td><td>новички</td></tr>
+  </table>
+  <table class="qref">
+    <tr><th>CLI-команда</th><th>Что делает</th></tr>
+    <tr><td><code>openspec init --tools qwen</code></td><td>инициализация проекта + команды для GigaCode</td></tr>
+    <tr><td><code>openspec update</code></td><td>перегенерация командных файлов после апгрейда CLI/профиля</td></tr>
+    <tr><td><code>openspec list</code> / <code>list --specs</code></td><td>активные change'и / capabilities main spec</td></tr>
+    <tr><td><code>openspec view</code></td><td>интерактивный дашборд по спекам и change'ам</td></tr>
+    <tr><td><code>openspec show &lt;имя&gt;</code></td><td>детали change'а или спеки (<code>--json</code> для скриптов)</td></tr>
+    <tr><td><code>openspec validate &lt;имя&gt; --strict</code></td><td>структурная валидация (гейт G2; <code>--all</code> в CI)</td></tr>
+    <tr><td><code>openspec status --change &lt;имя&gt;</code></td><td>прогресс артефактов: готово / следующий / заблокировано</td></tr>
+    <tr><td><code>openspec instructions &lt;артефакт&gt; --json</code></td><td>машинная инструкция для агента (шаблон+контекст+правила)</td></tr>
+    <tr><td><code>openspec archive &lt;имя&gt; --yes</code></td><td>archive без интерактива (CI/скрипты)</td></tr>
+    <tr><td><code>openspec schema fork/init/validate</code></td><td>работа с кастомными схемами workflow</td></tr>
+  </table>
+</section>
+
+<!-- ============================ PACK ============================ -->
+<section id="pack">
+  <h2>Стартовый пакет: скопируй и работай</h2>
+  <p class="lead">Четыре файла, которые превращают «голый» OpenSpec в наш ролевой workflow. Кладутся в репозиторий
+  после <code>openspec init</code> (поставляются также отдельным zip-архивом рядом с этим документом).
+  Рядом поставляется и демо-проект <code>transfer-limits-demo</code> — полный цикл playbook, реально пройденный
+  на мини-сервисе переводов: все артефакты, гейты, validate и archive; маршрут — в файле <code>WALKTHROUGH.md</code> внутри.</p>
+
+  <h3>1 · Кастомная схема workflow</h3>
+  <div class="codewrap labeled"><span class="filelabel">openspec/schemas/sdd-roles/schema.yaml</span>
+<pre><span class="k">name:</span> sdd-roles
+<span class="k">version:</span> 1
+<span class="k">description:</span> <span class="s">Spec-driven workflow с ролевым разделением PM / СА / Dev / QA</span>
+
+<span class="k">artifacts:</span>
+  - <span class="k">id:</span> proposal
+    <span class="k">generates:</span> proposal.md
+    <span class="k">description:</span> <span class="s">Зачем и что меняем — на основе интент-брифа PM</span>
+    <span class="k">template:</span> proposal.md
+    <span class="k">instruction:</span> |
+      Создай proposal строго на основе интент-брифа PM; ссылка на бриф обязательна.
+      Фокус на проблеме и границах scope, не на решении. Один интент — одно предложение.
+      Укажи затронутые команды/системы и rollback-план.
+    <span class="k">requires:</span> []
+
+  - <span class="k">id:</span> specs
+    <span class="k">generates:</span> <span class="s">specs/**/*.md</span>
+    <span class="k">description:</span> <span class="s">Дельты требований со сценариями (СА)</span>
+    <span class="k">template:</span> specs.md
+    <span class="k">instruction:</span> |
+      Каждое требование — одно наблюдаемое поведение с SHALL/MUST (RFC 2119).
+      Минимум один сценарий GIVEN/WHEN/THEN на требование; негативные и граничные
+      случаи обязательны. Формулировки — поведение, без деталей реализации.
+      Термины бери из main spec (openspec/specs/), не изобретай новые.
+    <span class="k">requires:</span> [proposal]
+
+  - <span class="k">id:</span> solution-design
+    <span class="k">generates:</span> solution-design.md
+    <span class="k">description:</span> <span class="s">Прикладное решение — алгоритмы, данные, контракты (СА)</span>
+    <span class="k">template:</span> solution-design.md
+    <span class="k">instruction:</span> |
+      Уровень системного анализа: алгоритмы, структуры данных, контракты интеграций,
+      нефункциональные ограничения. Без кода, имён классов и файлов.
+      Ключевые решения оформляй как "Decision: … / Почему: … / Альтернативы: …".
+    <span class="k">requires:</span> [proposal]
+
+  - <span class="k">id:</span> tech-design
+    <span class="k">generates:</span> tech-design.md
+    <span class="k">description:</span> <span class="s">Техническое решение на уровне кодовой базы (Dev)</span>
+    <span class="k">template:</span> tech-design.md
+    <span class="k">instruction:</span> |
+      Переведи solution-design в термины кодовой базы: модули, изменяемые файлы,
+      зависимости, миграции. Каждое отклонение от solution-design фиксируй явно
+      в разделе "Отклонения" — это вход для ревью аналитика.
+    <span class="k">requires:</span> [specs, solution-design]
+
+  - <span class="k">id:</span> test-model
+    <span class="k">generates:</span> test-model.md
+    <span class="k">description:</span> <span class="s">Тестовая модель из сценариев спеки (QA)</span>
+    <span class="k">template:</span> test-model.md
+    <span class="k">instruction:</span> |
+      Строй тест-модель ИЗ СЦЕНАРИЕВ specs, не из кода. Каждый тест-кейс
+      трассируется на Requirement/Scenario (указывай их заголовки). Помечай
+      кейсы для автоматизации и приоритет. Добавь негативные кейсы, если
+      сценарии их не покрывают — и предложи дельту в спеку.
+    <span class="k">requires:</span> [specs]
+
+  - <span class="k">id:</span> tasks
+    <span class="k">generates:</span> tasks.md
+    <span class="k">description:</span> <span class="s">Чек-лист реализации (Dev)</span>
+    <span class="k">template:</span> tasks.md
+    <span class="k">instruction:</span> |
+      Иерархический чек-лист (1.1, 1.2, …), каждая задача — не больше одной
+      рабочей сессии. Группируй по смыслу. Последняя группа — прогон тестов
+      из test-model и обновление документации.
+    <span class="k">requires:</span> [tech-design]
+
+<span class="k">apply:</span>
+  <span class="k">requires:</span> [tasks]
+  <span class="k">tracks:</span> tasks.md</pre><button class="copybtn">Копировать</button></div>
+  <div class="note info">Рядом со схемой лежит папка <code>templates/</code> — заготовки каждого артефакта
+  (в zip-пакете они уже есть). Проверка: <code>openspec schema validate sdd-roles</code>.</div>
+
+  <h3>2 · Конфигурация проекта</h3>
+  <div class="codewrap labeled"><span class="filelabel">openspec/config.yaml</span>
+<pre><span class="k">schema:</span> sdd-roles
+
+<span class="c"># context попадает в промпт ПРИ ГЕНЕРАЦИИ ЛЮБОГО артефакта.</span>
+<span class="c"># Именно поэтому PM не должен диктовать техдетали руками.</span>
+<span class="k">context:</span> |
+  Продукт: &lt;название и одно предложение о нём&gt;.
+  Main spec: openspec/specs/ — источник истины, поддерживается через archive.
+  Терминология — оттуда.
+  Стек: &lt;языки, фреймворки, БД, очереди&gt;.
+  Стандарты: &lt;API-стиль, обработка ошибок, аудит, безопасность&gt;.
+  Тестовый фреймворк: &lt;...&gt;.
+  Мы ценим обратную совместимость публичных API.
+
+<span class="c"># rules добавляются только к своему артефакту</span>
+<span class="k">rules:</span>
+  <span class="k">proposal:</span>
+    - Ссылка на интент-бриф PM обязательна
+    - Указать rollback-план и затронутые команды
+  <span class="k">specs:</span>
+    - Использовать формат GIVEN/WHEN/THEN
+    - Прежде чем вводить новое требование — проверить существующие в main spec
+  <span class="k">test-model:</span>
+    - Каждый кейс ссылается на Requirement/Scenario из specs
+
+<span class="k">operations:</span>
+  <span class="k">apply:</span>
+    <span class="k">guidance:</span>
+      - Запускать целевые тесты до полного прогона
+      - Ревью diff'а перед каждым следующим таском
+  <span class="k">archive:</span>
+    <span class="k">guidance:</span>
+      - Архивировать только после мерджа PR в main</pre><button class="copybtn">Копировать</button></div>
+
+  <h3>3 · Шаблон интент-брифа (артефакт PM)</h3>
+  <div class="codewrap labeled"><span class="filelabel">docs/intent-brief-template.md</span>
+<pre><span class="k"># Интент-бриф: &lt;короткое имя изменения&gt;</span>
+
+<span class="k">## Проблема / возможность</span>
+Что болит или какую возможность берём. 2–4 предложения, без решения.
+
+<span class="k">## Для кого</span>
+Сегмент/роль пользователя, масштаб охвата.
+
+<span class="k">## Ценность и критерии успеха</span>
+- Какой эффект ждём (метрика, поведение клиентов, снижение затрат)
+- Как поймём, что получилось: &lt;измеримый критерий 1&gt;, &lt;критерий 2&gt;
+
+<span class="k">## Scope</span>
+<span class="k">В этом изменении:</span>
+- ...
+<span class="k">НЕ в этом изменении (осознанно):</span>
+- ...
+
+<span class="k">## Что обидно сломать</span>
+Именованные кейсы, которые обязаны продолжить работать:
+- «Клиент с несколькими счетами по-прежнему …»
+- «При отзыве согласия …»
+
+<span class="k">## Ограничения</span>
+Сроки, регуляторика, зависимости от других команд.
+
+<span class="k">## Приоритет и ссылки</span>
+Приоритет; ссылки на исследования, обращения, инциденты.</pre><button class="copybtn">Копировать</button></div>
+
+  <h3>4 · Шаблон тест-модели (для ориентира QA)</h3>
+  <div class="codewrap labeled"><span class="filelabel">openspec/schemas/sdd-roles/templates/test-model.md</span>
+<pre><span class="k"># Тест-модель: &lt;имя change'а&gt;</span>
+
+<span class="k">## Матрица трассировки</span>
+| ID | Requirement | Scenario | Тип | Приоритет | Авто |
+|----|-------------|----------|-----|-----------|------|
+| TC-01 | Session Timeout | Idle timeout | позитив | high | да |
+| TC-02 | Session Timeout | Активность на 29-й минуте | граница | high | да |
+
+<span class="k">## Кейсы</span>
+<span class="k">### TC-01: &lt;название кейса&gt;</span>
+- Requirement/Scenario: &lt;точные заголовки из спеки&gt;
+- Предусловия / Шаги / Ожидаемый результат
+- Данные: &lt;валидные/граничные значения&gt;
+
+<span class="k">## Пробелы спеки</span>
+Кейсы, для которых в спеке нет сценария → предложить СА дельту.</pre><button class="copybtn">Копировать</button></div>
+</section>
+
+<!-- ============================ MAINSPEC ============================ -->
+<section id="mainspec">
+  <h2>Main spec: два сценария старта</h2>
+  <p class="lead">Propose и дельты MODIFIED/REMOVED опираются на main spec — источник истины о текущем
+  поведении системы. От того, есть ли он у продукта, зависит стартовая траектория команды.</p>
+
+  <div class="grid2">
+    <div class="card" style="border-top:4px solid var(--accent);padding-top:16px">
+      <h3 style="margin:0 0 4px">Сценарий А · main spec есть</h3>
+      <p style="font-size:13px;color:var(--ink-mute);margin:0 0 10px">Спеки наполнены заранее — перенесены из
+      существующей документации или восстановлены из кода принятым в команде способом.</p>
+      <ul style="margin:8px 0;padding-left:18px;font-size:14px;color:var(--ink-soft)">
+        <li>Перед стартом: <code>openspec validate --specs --all --strict</code> без ошибок;
+          в <code>project.md</code> зафиксирован срез кода (repo@commit), которому соответствуют спеки</li>
+        <li>СА проходит спеки и подписывает их до использования как источника истины —
+          неподписанный baseline источником не является</li>
+        <li>Дальше — полный цикл playbook без оговорок: MODIFIED/REMOVED корректны,
+          конфликты спек между change'ами работают как задумано</li>
+      </ul>
+      <p style="font-size:13px;color:var(--ink-soft);margin:10px 0 0"><b>Когда выбирать:</b> зрелые системы
+      с распределённым поведением и регуляторикой; команды, где propose ведёт аналитик, не читающий код.</p>
+    </div>
+    <div class="card" style="border-top:4px solid var(--ink-mute);padding-top:16px">
+      <h3 style="margin:0 0 4px">Сценарий Б · main spec нет</h3>
+      <p style="font-size:13px;color:var(--ink-mute);margin:0 0 10px">Delta-first — официальная модель OpenSpec:
+      спеки нарастают от изменений, каждый change документирует только свой участок.</p>
+      <ul style="margin:8px 0;padding-left:18px;font-size:14px;color:var(--ink-soft)">
+        <li><code>/opsx-explore</code> перед propose обязателен: агент читает код зоны изменения,
+          аналитик проверяет его выводы вопросами</li>
+        <li>Первая дельта в новую capability — <code>ADDED</code> с секцией <code>## Purpose</code></li>
+        <li>Прежде чем менять существующее поведение — зафиксировать текущее: в дельте MODIFIED
+          описывается и «как есть», и «как будет», а не только новое</li>
+        <li>Помнить: отсутствие требования в спеке не означает, что поведения нет в системе</li>
+      </ul>
+      <p style="font-size:13px;color:var(--ink-soft);margin:10px 0 0"><b>Когда выбирать:</b> новые сервисы,
+      небольшие модули, зоны с редкими изменениями.</p>
+    </div>
+  </div>
+
+  <div class="note info"><b>Сценарии комбинируются по зонам одного продукта.</b> Capability, где сосредоточен
+  роадмап ближайших кварталов или где регуляторика требует полноты, доводите до сценария А заранее; остальное
+  пусть дорастает по сценарию Б. Правило простое: чем горячее зона — тем раньше ей нужен baseline. Для
+  планирования, охватывающего несколько репозиториев, у OpenSpec есть stores (beta) — спеки в отдельном
+  репозитории, подключаемом через <code>references</code>; начинать советуем без них, с одного пилотного репо.</div>
+</section>
+
+<!-- ============================ ADOPTION ============================ -->
+<section id="adoption">
+  <h2>Внедрение: пилот и метрики</h2>
+
+  <h3>Пилот на 4–6 недель</h3>
+  <table>
+    <tr><th>Неделя</th><th>Что происходит</th></tr>
+    <tr><td>1</td><td>Одна команда-пилот. Разворачивание по внутренней инструкции, стартовый пакет;
+      main spec — по сценарию А или Б (раздел «Main spec»). Каждый проходит <code>/opsx-onboard</code>.
+      Выбираем 2–3 некрупных change'а.</td></tr>
+    <tr><td>2–4</td><td>Полный цикл на реальных задачах. Лидер пилота (СА) собирает трение по каждому гейту:
+      что мешает, где чек-лист избыточен, где ИИ систематически мажет — правим rules в config.yaml, а не терпим.</td></tr>
+    <tr><td>5–6</td><td>Ретро: метрики до/после, правка playbook по фактам. Решение о масштабировании,
+      пилотная команда становится «носителем» практики для следующих.</td></tr>
+  </table>
+
+  <h3>Метрики, по которым судим</h3>
+  <div class="grid2">
+    <div class="card"><b>Скорость и предсказуемость</b>
+      <ul style="margin:8px 0;padding-left:18px;font-size:14px;color:var(--ink-soft)">
+        <li>Lead time: бриф → мердж PR</li>
+        <li>Доля change'ей, вернувшихся с гейтов (по каждому гейту отдельно)</li>
+        <li>Доля переделок после G4 (поздние возвраты — самые дорогие)</li>
+      </ul></div>
+    <div class="card"><b>Качество и доверие</b>
+      <ul style="margin:8px 0;padding-left:18px;font-size:14px;color:var(--ink-soft)">
+        <li>CRITICAL/WARNING на verify — тренд по неделям</li>
+        <li>Покрытие: доля сценариев спеки, закрытых автотестами</li>
+        <li>Дефекты, дошедшие до теста/прода, у пилота vs остальных</li>
+      </ul></div>
+  </div>
+  <div class="note info"><b>Чего НЕ мерить:</b> «количество строк кода от ИИ» и «процент сгенерированных артефактов».
+  Эти метрики поощряют объём вместо качества.</div>
+
+  <h3>Ответственность за ошибки ИИ</h3>
+  <p style="max-width:760px;color:var(--ink-soft)">Правило одно: за артефакт отвечает тот, кто его подписал на гейте, — независимо от того,
+  кто печатал текст: человек или модель. «Это ИИ так написал» — не аргумент на разборе, как не был аргументом
+  «это Stack Overflow так написал». Именно поэтому гейты обязаны быть дешёвыми: подписывать не глядя — нельзя,
+  а значит, проверка должна занимать минуты, не часы. Чек-листы G0–G6 для этого и существуют.</p>
+</section>
+
+<footer>
+  <b>SDD Playbook v1.0</b> · август 2026 · Основа: OpenSpec 1.8 (Fission-AI), схема sdd-roles ·
+  Инструменты команды: GigaCode, DeepSeek / Qwen / GLM ·
+  Документ самодостаточен: печать (Ctrl/Cmd+P) даёт корректную версию без навигации.
+</footer>
+
+</main>
+</div>
+<script>
+document.querySelectorAll('.copybtn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const pre=btn.parentElement.querySelector('pre');
+    navigator.clipboard.writeText(pre.innerText).then(()=>{
+      const t=btn.textContent;btn.textContent='Скопировано ✓';
+      setTimeout(()=>btn.textContent=t,1600);
+    });
+  });
+});
+const links=[...document.querySelectorAll('#sidenav a')];
+const secs=links.map(a=>document.querySelector(a.getAttribute('href'))).filter(Boolean);
+const spy=()=>{let cur=secs[0];for(const s of secs){if(s.getBoundingClientRect().top<140)cur=s}
+  links.forEach(a=>a.classList.toggle('active',a.getAttribute('href')==='#'+cur.id))};
+document.addEventListener('scroll',spy,{passive:true});spy();
+</script>
+</body>
+</html>

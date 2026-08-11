@@ -1,0 +1,70 @@
+name: sdd-roles
+version: 1
+description: Spec-driven workflow с ролевым разделением PM / СА / Dev / QA
+
+artifacts:
+  - id: proposal
+    generates: proposal.md
+    description: Зачем и что меняем — на основе интент-брифа PM
+    template: proposal.md
+    instruction: |
+      Создай proposal строго на основе интент-брифа PM; ссылка на бриф обязательна.
+      Фокус на проблеме и границах scope, не на решении. Один интент — одно предложение.
+      Укажи затронутые команды/системы и rollback-план.
+    requires: []
+
+  - id: specs
+    generates: specs/**/*.md
+    description: Дельты требований со сценариями (СА)
+    template: specs.md
+    instruction: |
+      Каждое требование — одно наблюдаемое поведение с SHALL/MUST (RFC 2119).
+      Минимум один сценарий GIVEN/WHEN/THEN на требование; негативные и граничные
+      случаи обязательны. Формулировки — поведение, без деталей реализации.
+      Термины бери из main spec (openspec/specs/), не изобретай новые.
+    requires: [proposal]
+
+  - id: solution-design
+    generates: solution-design.md
+    description: Прикладное решение — алгоритмы, данные, контракты (СА)
+    template: solution-design.md
+    instruction: |
+      Уровень системного анализа: алгоритмы, структуры данных, контракты интеграций,
+      нефункциональные ограничения. Без кода, имён классов и файлов.
+      Ключевые решения оформляй как "Decision: ... / Почему: ... / Альтернативы: ...".
+    requires: [proposal]
+
+  - id: tech-design
+    generates: tech-design.md
+    description: Техническое решение на уровне кодовой базы (Dev)
+    template: tech-design.md
+    instruction: |
+      Переведи solution-design в термины кодовой базы: модули, изменяемые файлы,
+      зависимости, миграции. Каждое отклонение от solution-design фиксируй явно
+      в разделе "Отклонения" — это вход для ревью аналитика.
+    requires: [specs, solution-design]
+
+  - id: test-model
+    generates: test-model.md
+    description: Тестовая модель из сценариев спеки (QA)
+    template: test-model.md
+    instruction: |
+      Строй тест-модель ИЗ СЦЕНАРИЕВ specs, не из кода. Каждый тест-кейс
+      трассируется на Requirement/Scenario (указывай их заголовки). Помечай
+      кейсы для автоматизации и приоритет. Добавь негативные кейсы, если
+      сценарии их не покрывают — и предложи дельту в спеку.
+    requires: [specs]
+
+  - id: tasks
+    generates: tasks.md
+    description: Чек-лист реализации (Dev)
+    template: tasks.md
+    instruction: |
+      Иерархический чек-лист (1.1, 1.2, ...), каждая задача — не больше одной
+      рабочей сессии. Группируй по смыслу. Последняя группа — прогон тестов
+      из test-model и обновление документации.
+    requires: [tech-design]
+
+apply:
+  requires: [tasks]
+  tracks: tasks.md
