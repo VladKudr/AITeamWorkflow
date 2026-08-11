@@ -417,7 +417,9 @@
         <div class="who">Инструмент: чат-LLM (DeepSeek/Qwen/GLM) по шаблону · CLI не нужен</div>
         <p>PM формулирует: проблема и ценность, для кого, критерии успеха, scope in/out,
         именованные кейсы («что обидно сломать»), ограничения. Устные и письменные требования не запрещены —
-        они <em>канализируются</em> в бриф. Это единственный новый артефакт для PM.</p>
+        они <em>канализируются</em> в бриф. Это единственный новый артефакт для PM.
+        Готовый бриф СА сохраняет в репозиторий: <code>docs/intent-brief-&lt;имя-change&gt;.md</code> —
+        именно оттуда его прочитает агент на шаге proposal.</p>
         <p><span class="gatechip">Гейт G0 · бриф полон по чек-листу</span></p>
       </div></div>
     </li>
@@ -613,9 +615,12 @@
   <div class="codewrap"><pre><span class="c"># ветка под change (имя — kebab-case, один интент)</span>
 <span class="cmd">git switch -c add-payment-limit</span>
 
+<span class="c"># бриф PM — в репозиторий, ДО каркаса (его прочитает шаг proposal):</span>
+<span class="cmd">cp &lt;бриф от PM&gt; docs/intent-brief-add-payment-limit.md</span>
+
 <span class="c"># в GigaCode:</span>
-/opsx-new add-payment-limit        <span class="c"># каркас change (схема sdd-roles подхватится из config.yaml)</span>
-/opsx-continue                     <span class="c"># → proposal.md (даёт ИИ бриф PM как вход!)</span>
+/opsx-new add-payment-limit        <span class="c"># каркас change; интент сюда НЕ передаётся — только имя</span>
+/opsx-continue                     <span class="c"># → proposal.md — агент сам читает бриф по конвенции имени</span>
 <span class="c">#   ...правим proposal, несём PM на подпись (G1)...</span>
 /opsx-continue                     <span class="c"># → specs/ — дельты требований со сценариями</span>
 <span class="c">#   ...затачиваем требования и сценарии...</span>
@@ -807,6 +812,10 @@
     с метаданными (наша схема sdd-roles подхватится из config.yaml автоматически). <b>Ничего не генерирует</b> — просто заводит место и останавливается.</p>
     <p style="margin:6px 0;font-size:14.5px;color:var(--ink-soft)"><b>Когда набирать:</b> начало любой задачи. Имя — kebab-case, один интент:
     <code>add-payment-limit</code>, а не <code>feature-1</code> или <code>wip</code>.</p>
+    <p style="margin:6px 0;font-size:14.5px;color:var(--ink-soft)"><b>Важно про интент:</b> имя — единственное, что принимает
+    команда; сам интент в неё НЕ передаётся. Бриф PM должен уже лежать в
+    <code>docs/intent-brief-&lt;имя-change&gt;.md</code> — правило в config.yaml велит агенту прочитать его
+    на шаге proposal. Запасной вариант — указать путь к брифу прямо в сообщении с <code>/opsx-continue</code>.</p>
     <p style="margin:6px 0 0;font-size:14.5px;color:var(--ink-soft)"><b>Что дальше:</b> <code>/opsx-continue</code> — начнёт создавать артефакты по одному.</p>
   </div>
 
